@@ -31,6 +31,18 @@ double f_E_Gaussian(double theta, void *params)
     return 0.0;
 }
 
+double f_E_GaussianRing(double theta, void *params)
+{
+    struct fluxParams *pars = (struct fluxParams *)params;
+    if(theta <= pars->theta_wing)
+    {
+        double x = theta / pars->theta_core;
+        double offset   = 0.5 * M_PI / pars->theta_core;
+        return pars->E_iso_core * exp(-0.5 * (x - offset) * (x - offset));
+    }
+    return 0.0;
+}
+
 double f_E_powerlaw(double theta, void *params)
 {
     struct fluxParams *pars = (struct fluxParams *)params;
