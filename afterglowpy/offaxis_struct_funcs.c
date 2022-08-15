@@ -36,7 +36,7 @@ double f_E_GaussianRing(double theta, void *params)
     struct fluxParams *pars = (struct fluxParams *)params;
     if(theta <= pars->theta_wing)
     {
-        double x = theta / pars->theta_core;
+        double x        = theta / pars->theta_core;
         double offset   = 0.5 * M_PI / pars->theta_core;
         return pars->E_iso_core * exp(-0.5 * (x - offset) * (x - offset));
     }
@@ -1203,6 +1203,59 @@ void lc_structCore(double *t, double *nu, double *F, int Nt,
 
         for(j=0; j<Nt; j++)
         {
+            F[j] += flux_cone(t[j], nu[j], -1, -1, theta_cone_low,
+                                theta_cone_hi,
+                                F[j]*pars->rtol_struct/res_cones,
+                                pars);
+            ERR_CHK_VOID(pars)
+        }
+    }
+}
+
+void lc_structRing(double *t, double *nu, double *F, int Nt,
+                        double E_iso_core, 
+                        double theta_h_core, double theta_h_wing,
+                        double *theta_c_arr, double *E_iso_arr,
+                        int res_cones, double (*f_E)(double,void *),
+                        struct fluxParams *pars)
+{
+    //Flux from a structured jet.
+    
+    int i,j;
+    //No Core
+    for(j=0; j<Nt; j++)
+        F[j] = 0.0;
+
+    double Dtheta, theta_cone_hi, theta_cone_low, theta_h, theta_c, E_iso;
+
+    Dtheta = theta_h_wing / res_cones;
+
+    for (int i = res_cones; i --> 0; )
+    {
+        theta_c = (i+0.5) * Dtheta;
+        E_iso = f_E(theta_c, pars);
+
+        theta_cone_hi = (i+1) * Dtheta;
+        theta_cone_low = i * Dtheta;
+        theta_h = theta_cone_hi;
+
+        //printf("cone %d: th_lo=%.6lf th_hi=%.6lf, E=%.6le\n", i,
+        //        theta_cone_low, theta_cone_hi, E_iso);
+
+        if(theta_c_arr != NULL)
+            theta_c_arr[i] = theta_c;
+        if(E_iso_arr != NULL)
+            E_iso_arr[i] = E_iso;
+
+        if(E_iso <= 0.0)
+            continue;
+
+        set_jet_params(pars, E_iso, theta_h);
+        ERR_CHK_VOID(pars)
+
+        for(j=0; j<Nt; j++)
+        {
+            //printf("tobs = %.6le\n", t[j]);
             F[j] += flux_cone(t[j], nu[j], -1, -1, theta_cone_low,
                                 theta_cone_hi,
                                 F[j]*pars->rtol_struct/res_cones,

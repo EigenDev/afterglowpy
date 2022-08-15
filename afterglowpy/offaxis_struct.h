@@ -51,6 +51,7 @@
 #define _exponential 5
 #define _twocomponent 6
 #define _exponential2 7
+#define _ring 8
 
 #define IC_COOLING_FLAG 1
 #define EPS_E_BAR_FLAG  2
