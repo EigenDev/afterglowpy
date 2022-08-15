@@ -1119,7 +1119,6 @@ void lc_struct(double *t, double *nu, double *F, int Nt,
                         struct fluxParams *pars)
 {
     //Flux from a structured jet.
-    
     int i,j;
     //No Core
     for(j=0; j<Nt; j++)
@@ -1239,7 +1238,7 @@ void lc_structRing(double *t, double *nu, double *F, int Nt,
         theta_cone_low = i * Dtheta;
         theta_h = theta_cone_hi;
 
-        //printf("cone %d: th_lo=%.6lf th_hi=%.6lf, E=%.6le\n", i,
+        // printf("cone %d: th_lo=%.6lf th_hi=%.6lf, E=%.6le\n", i,
         //        theta_cone_low, theta_cone_hi, E_iso);
 
         if(theta_c_arr != NULL)
@@ -1922,7 +1921,6 @@ void calc_flux_density(int jet_type, int spec_type, double *t, double *nu,
 
     int res_cones = (int) (latRes*theta_h_wing / theta_h_core);
 
-
     if(jet_type == _tophat)
     {
         lc_tophat(t, nu, Fnu, N, E_iso_core, theta_h_core, fp);
@@ -1965,6 +1963,11 @@ void calc_flux_density(int jet_type, int spec_type, double *t, double *nu,
     {
         lc_structCore(t, nu, Fnu, N, E_iso_core, theta_h_core, 
                 theta_h_wing, NULL, NULL, res_cones, &f_E_exponential2, fp);
+    }
+    else if (jet_type == _ring)
+    {
+        lc_structRing(t, nu, Fnu, N, E_iso_core, theta_h_core, 
+                theta_h_wing, NULL, NULL, res_cones, &f_E_GaussianRing, fp);
     }
 
     //printf("  Calc took %ld evalutions\n", fp->nevals);

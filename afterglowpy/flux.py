@@ -43,8 +43,8 @@ def fluxDensity(t, nu, *args, **kwargs):
     jetType : int
         Code for type of jet. Model codes are available in ``afterglowpy.jet``
         and include: ``jet.TopHat``, ``jet.Cone``, ``jet.Gaussian``,
-        ``jet.PowerLaw``, ``jet.GaussianCore``, ``jet.PowerLawCore``, and
-        ``jet.Spherical``.
+        ``jet.PowerLaw``, ``jet.GaussianCore``, ``jet.PowerLawCore``,
+        ``jet.Spherical`, and ``jet.Ring''`.
     specType : int
         Code for type of spectrum.  Options are: 0 broken power law
         (Ryan+ 2020), 1 broken power law w/ inverse Compton cooling. Default: 0
