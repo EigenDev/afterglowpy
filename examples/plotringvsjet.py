@@ -49,7 +49,7 @@ def main():
         'spread':      False,
         'thetaObs':    np.pi / 2.0,   # Viewing angle in radians
         'E0':          eiso, # Isotropic-equivalent energy in erg
-        'thetaCore':   np.pi/2 - 0.1,    # Half-opening angle in radians
+        'thetaCore':   np.pi/2 - 0.17/2,    # Half-opening angle in radians
         'thetaWing':   np.pi / 2,
         'counterjet':  True,
         'n0':          1.0,    # circumburst density in cm^{-3}
@@ -67,7 +67,7 @@ def main():
             'spread':      False,
             'thetaObs':    np.pi / 2.0,   # Viewing angle in radians
             'E0':          eiso, # Isotropic-equivalent energy in erg
-            'thetaCore':   np.pi/2 - 0.1,    # Half-opening angle in radians
+            'thetaCore':   np.pi/2 - 0.17/2,    # Half-opening angle in radians
             'thetaWing':   np.pi / 2,
             'counterjet':  True,
             'n0':          1.0,    # circumburst density in cm^{-3}
