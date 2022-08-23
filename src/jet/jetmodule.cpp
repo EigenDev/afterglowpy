@@ -288,11 +288,11 @@ static PyObject *jet_fluxDensity(PyObject *self, PyObject *args,
                                                 NPY_ARRAY_IN_ARRAY);
     nu_arr = (PyArrayObject *) PyArray_FROM_OTF(nu_obj, NPY_DOUBLE,
                                                 NPY_ARRAY_IN_ARRAY);
-    if(mask_obj != NULL)
+    if(mask_obj )
         mask_arr = (PyArrayObject *) PyArray_FROM_OTF(mask_obj, NPY_DOUBLE,
                                                 NPY_ARRAY_IN_ARRAY);
 
-    if(t_arr == NULL || nu_arr == NULL || (mask_obj != NULL
+    if(t_arr == NULL || nu_arr == NULL || (mask_obj 
                                             && mask_arr == NULL))
     {
         PyErr_SetString(PyExc_RuntimeError, "Could not read input arrays.");
@@ -305,15 +305,15 @@ static PyObject *jet_fluxDensity(PyObject *self, PyObject *args,
     int t_ndim = (int) PyArray_NDIM(t_arr);
     int nu_ndim = (int) PyArray_NDIM(nu_arr);
     int mask_ndim = 0;
-    if(mask_obj != NULL)
+    if(mask_obj )
         mask_ndim = (int) PyArray_NDIM(mask_arr);
 
-    if(t_ndim != 1 || nu_ndim != 1 || (mask_obj != NULL && mask_ndim != 1))
+    if(t_ndim != 1 || nu_ndim != 1 || (mask_obj  && mask_ndim != 1))
     {
         PyErr_SetString(PyExc_RuntimeError, "Arrays must be 1-D.");
         Py_DECREF(t_arr);
         Py_DECREF(nu_arr);
-        if(mask_obj != NULL)
+        if(mask_obj )
             Py_DECREF(mask_arr);
         return NULL;
     }
@@ -321,7 +321,7 @@ static PyObject *jet_fluxDensity(PyObject *self, PyObject *args,
     int N = (int)PyArray_DIM(t_arr, 0);
     int Nnu = (int)PyArray_DIM(nu_arr, 0);
     int Nmask = 0;
-    if(mask_obj != NULL)
+    if(mask_obj )
         Nmask = (int)PyArray_DIM(mask_arr, 0);
 
     if(N != Nnu)
@@ -329,11 +329,11 @@ static PyObject *jet_fluxDensity(PyObject *self, PyObject *args,
         PyErr_SetString(PyExc_RuntimeError, "Arrays must be same size.");
         Py_DECREF(t_arr);
         Py_DECREF(nu_arr);
-        if(mask_obj != NULL)
+        if(mask_obj )
             Py_DECREF(mask_arr);
         return NULL;
     }
-    if(mask_obj != NULL && Nmask%9 != 0)
+    if(mask_obj  && Nmask%9 != 0)
     {
         PyErr_SetString(PyExc_RuntimeError, 
                             "Mask length must be multiple of 9.");
@@ -346,7 +346,7 @@ static PyObject *jet_fluxDensity(PyObject *self, PyObject *args,
     double *t = (double *)PyArray_DATA(t_arr);
     double *nu = (double *)PyArray_DATA(nu_arr);
     double *mask = NULL;
-    if(mask_obj != NULL)
+    if(mask_obj )
         mask = (double *)PyArray_DATA(mask_arr);
     int masklen = Nmask/9;
 
@@ -416,7 +416,7 @@ static PyObject *jet_fluxDensity(PyObject *self, PyObject *args,
     // Clean up!
     Py_DECREF(t_arr);
     Py_DECREF(nu_arr);
-    if(mask_obj != NULL)
+    if(mask_obj )
         Py_DECREF(mask_arr);
 
     //Build output
@@ -559,12 +559,12 @@ static PyObject *jet_intensity(PyObject *self, PyObject *args, PyObject *kwargs)
                                                 NPY_ARRAY_IN_ARRAY);
     nu_arr = (PyArrayObject *) PyArray_FROM_OTF(nu_obj, NPY_DOUBLE,
                                                 NPY_ARRAY_IN_ARRAY);
-    if(mask_obj != NULL)
+    if(mask_obj )
         mask_arr = (PyArrayObject *) PyArray_FROM_OTF(mask_obj, NPY_DOUBLE,
                                                 NPY_ARRAY_IN_ARRAY);
 
     if(theta_arr == NULL || phi_arr == NULL || t_arr == NULL || nu_arr == NULL
-            || (mask_obj != NULL && mask_arr == NULL))
+            || (mask_obj  && mask_arr == NULL))
     {
         PyErr_SetString(PyExc_RuntimeError, "Could not read input arrays.");
         Py_XDECREF(theta_arr);
@@ -580,18 +580,18 @@ static PyObject *jet_intensity(PyObject *self, PyObject *args, PyObject *kwargs)
     int t_ndim = (int) PyArray_NDIM(t_arr);
     int nu_ndim = (int) PyArray_NDIM(nu_arr);
     int mask_ndim = 0;
-    if(mask_obj != NULL)
+    if(mask_obj )
         mask_ndim = (int) PyArray_NDIM(mask_arr);
 
     if(theta_ndim != 1 || phi_ndim != 1 || t_ndim != 1 || nu_ndim != 1
-            || (mask_obj != NULL && mask_ndim != 1))
+            || (mask_obj  && mask_ndim != 1))
     {
         PyErr_SetString(PyExc_RuntimeError, "Arrays must be 1-D.");
         Py_DECREF(theta_arr);
         Py_DECREF(phi_arr);
         Py_DECREF(t_arr);
         Py_DECREF(nu_arr);
-        if(mask_obj != NULL)
+        if(mask_obj )
             Py_DECREF(mask_arr);
         return NULL;
     }
@@ -601,7 +601,7 @@ static PyObject *jet_intensity(PyObject *self, PyObject *args, PyObject *kwargs)
     int Nt = (int)PyArray_DIM(t_arr, 0);
     int Nnu = (int)PyArray_DIM(nu_arr, 0);
     int Nmask = 0;
-    if(mask_obj != NULL)
+    if(mask_obj )
         Nmask = (int)PyArray_DIM(mask_arr, 0);
 
     if(N!=Np || N!=Nt || N!=Nnu || Np!=Nt || Np!=Nnu || Nt!=Nnu)
@@ -611,11 +611,11 @@ static PyObject *jet_intensity(PyObject *self, PyObject *args, PyObject *kwargs)
         Py_DECREF(phi_arr);
         Py_DECREF(t_arr);
         Py_DECREF(nu_arr);
-        if(mask_obj != NULL)
+        if(mask_obj )
             Py_DECREF(mask_arr);
         return NULL;
     }
-    if(mask_obj != NULL && Nmask%9 != 0)
+    if(mask_obj  && Nmask%9 != 0)
     {
         PyErr_SetString(PyExc_RuntimeError, 
                             "Mask length must be multiple of 9.");
@@ -632,7 +632,7 @@ static PyObject *jet_intensity(PyObject *self, PyObject *args, PyObject *kwargs)
     double *t = (double *)PyArray_DATA(t_arr);
     double *nu = (double *)PyArray_DATA(nu_arr);
     double *mask = NULL;
-    if(mask_obj != NULL)
+    if(mask_obj )
         mask = (double *)PyArray_DATA(mask_arr);
     int masklen = Nmask/9;
 
@@ -695,7 +695,7 @@ static PyObject *jet_intensity(PyObject *self, PyObject *args, PyObject *kwargs)
     Py_DECREF(phi_arr);
     Py_DECREF(t_arr);
     Py_DECREF(nu_arr);
-    if(mask_obj != NULL)
+    if(mask_obj )
         Py_DECREF(mask_arr);
 
     //Build output
@@ -793,12 +793,12 @@ static PyObject *jet_shockVals(PyObject *self, PyObject *args, PyObject *kwargs)
                                                 NPY_ARRAY_IN_ARRAY);
     t_arr = (PyArrayObject *) PyArray_FROM_OTF(t_obj, NPY_DOUBLE,
                                                 NPY_ARRAY_IN_ARRAY);
-    if(mask_obj != NULL)
+    if(mask_obj )
         mask_arr = (PyArrayObject *) PyArray_FROM_OTF(mask_obj, NPY_DOUBLE,
                                                 NPY_ARRAY_IN_ARRAY);
 
     if(theta_arr == NULL || phi_arr == NULL || t_arr == NULL
-            || (mask_obj != NULL && mask_arr == NULL))
+            || (mask_obj  && mask_arr == NULL))
     {
         PyErr_SetString(PyExc_RuntimeError, "Could not read input arrays.");
         Py_XDECREF(theta_arr);
@@ -812,17 +812,17 @@ static PyObject *jet_shockVals(PyObject *self, PyObject *args, PyObject *kwargs)
     int phi_ndim = (int) PyArray_NDIM(phi_arr);
     int t_ndim = (int) PyArray_NDIM(t_arr);
     int mask_ndim = 0;
-    if(mask_obj != NULL)
+    if(mask_obj )
         mask_ndim = (int) PyArray_NDIM(mask_arr);
 
     if(theta_ndim != 1 || phi_ndim != 1 || t_ndim != 1
-            || (mask_obj != NULL && mask_ndim != 1))
+            || (mask_obj  && mask_ndim != 1))
     {
         PyErr_SetString(PyExc_RuntimeError, "Arrays must be 1-D.");
         Py_DECREF(theta_arr);
         Py_DECREF(phi_arr);
         Py_DECREF(t_arr);
-        if(mask_obj != NULL)
+        if(mask_obj )
             Py_DECREF(mask_arr);
         return NULL;
     }
@@ -831,7 +831,7 @@ static PyObject *jet_shockVals(PyObject *self, PyObject *args, PyObject *kwargs)
     int Np = (int)PyArray_DIM(phi_arr, 0);
     int Nt = (int)PyArray_DIM(t_arr, 0);
     int Nmask = 0;
-    if(mask_obj != NULL)
+    if(mask_obj )
         Nmask = (int)PyArray_DIM(mask_arr, 0);
 
     if(N!=Np || N!=Nt || Np!=Nt)
@@ -840,18 +840,18 @@ static PyObject *jet_shockVals(PyObject *self, PyObject *args, PyObject *kwargs)
         Py_DECREF(theta_arr);
         Py_DECREF(phi_arr);
         Py_DECREF(t_arr);
-        if(mask_obj != NULL)
+        if(mask_obj )
             Py_DECREF(mask_arr);
         return NULL;
     }
-    if(mask_obj != NULL && Nmask%9 != 0)
+    if(mask_obj  && Nmask%9 != 0)
     {
         PyErr_SetString(PyExc_RuntimeError, 
                             "Mask length must be multiple of 9.");
         Py_DECREF(theta_arr);
         Py_DECREF(phi_arr);
         Py_DECREF(t_arr);
-        if(mask_obj != NULL)
+        if(mask_obj )
             Py_DECREF(mask_arr);
         return NULL;
     }
@@ -860,7 +860,7 @@ static PyObject *jet_shockVals(PyObject *self, PyObject *args, PyObject *kwargs)
     double *phi = (double *)PyArray_DATA(phi_arr);
     double *t = (double *)PyArray_DATA(t_arr);
     double *mask = NULL;
-    if(mask_obj != NULL)
+    if(mask_obj )
         mask = (double *)PyArray_DATA(mask_arr);
     int masklen = Nmask/9;
 
@@ -878,7 +878,7 @@ static PyObject *jet_shockVals(PyObject *self, PyObject *args, PyObject *kwargs)
         Py_DECREF(theta_arr);
         Py_DECREF(phi_arr);
         Py_DECREF(t_arr);
-        if(mask_obj != NULL)
+        if(mask_obj )
             Py_DECREF(mask_arr);
         return NULL;
     }
@@ -928,7 +928,7 @@ static PyObject *jet_shockVals(PyObject *self, PyObject *args, PyObject *kwargs)
     Py_DECREF(theta_arr);
     Py_DECREF(phi_arr);
     Py_DECREF(t_arr);
-    if(mask_obj != NULL)
+    if(mask_obj )
         Py_DECREF(mask_arr);
 
     //Build output

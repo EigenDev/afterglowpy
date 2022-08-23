@@ -398,7 +398,7 @@ def intensity(theta, phi, t, nu, *args, **kwargs):
 
     return Inu
 
-
+# def fluxDensity(t, nu, *args, **kwargs):
 def checkTNu(t, nu):
     # Make sure t and nu are array_like or castable to an array.
     t = np.atleast_1d(t)

@@ -1,14 +1,6 @@
 #include <string.h>
-#include "offaxis_struct.h"
-#include "shockEvolution.h"
-
-double dmin(const double a, const double b)
-{
-    if(a <= b)
-        return a;
-    else
-        return b;
-}
+#include "include/offaxis_struct.hpp"
+#include "include/shockEvolution.hpp"
  
 /////////////////////////////////////////////////////////////////////////
 
@@ -430,7 +422,7 @@ double emissivity(double nu, double R, double mu, double te,
                 double df = 2*X - 1 - (p-2)*b*po/X;
                 double dX = -f/df;
                 X += dX;
-                if(fabs(dX) < 1.0e-4*X)
+                if(std::abs(dX) < 1.0e-4*X)
                     break;
             }
         }
@@ -706,7 +698,7 @@ double phi_integrand(double a_phi, void* params) // outer integral
     double theta_0 = pars->current_theta_cone_low;
     double Dtheta = theta_1 - theta_0;
     int spreadVersion = 1;
-    if(pars->th_table != NULL && spreadVersion==1)
+    if(pars->th_table  && spreadVersion==1)
     {
         double th_0, th_1;
         th_1 = find_jet_edge(a_phi, pars->cto, pars->sto, theta_1,
@@ -735,7 +727,7 @@ double phi_integrand(double a_phi, void* params) // outer integral
         if(theta_1 > 0.5*M_PI)
             theta_1 = 0.5*M_PI;
     }
-    if(pars->th_table != NULL && spreadVersion==2)
+    if(pars->th_table  && spreadVersion==2)
     {
         // approx mu
         double ct = cos(0.5*(theta_0+theta_1));
@@ -756,8 +748,7 @@ double phi_integrand(double a_phi, void* params) // outer integral
     }
     else if (pars->t_obs > pars->t_NR && spreadVersion==3)
     {
-        theta_1 = dmin(0.5 * PI, 
-                        pars->theta_h + 0.1 * log( pars->t_obs / pars->t_NR));
+        theta_1 = std::min(0.5 * PI, pars->theta_h + 0.1 * std::log( pars->t_obs / pars->t_NR));
         if(theta_0 != 0.0)
             theta_0 = theta_1-Dtheta;
     }
@@ -1140,9 +1131,9 @@ void lc_struct(double *t, double *nu, double *F, int Nt,
         //printf("cone %d: th_lo=%.6lf th_hi=%.6lf, E=%.6le\n", i,
         //        theta_cone_low, theta_cone_hi, E_iso);
 
-        if(theta_c_arr != NULL)
+        if(theta_c_arr )
             theta_c_arr[i] = theta_c;
-        if(E_iso_arr != NULL)
+        if(E_iso_arr )
             E_iso_arr[i] = E_iso;
 
         if(E_iso <= 0.0)
@@ -1189,9 +1180,9 @@ void lc_structCore(double *t, double *nu, double *F, int Nt,
         theta_cone_low = theta_h_core + i * Dtheta;
         theta_h = theta_cone_hi;
 
-        if(theta_c_arr != NULL)
+        if(theta_c_arr )
             theta_c_arr[i] = theta_c;
-        if(E_iso_arr != NULL)
+        if(E_iso_arr )
             E_iso_arr[i] = E_iso;
 
         if(E_iso <= 0.0)
@@ -1241,9 +1232,9 @@ void lc_structRing(double *t, double *nu, double *F, int Nt,
         // printf("cone %d: th_lo=%.6lf th_hi=%.6lf, E=%.6le\n", i,
         //        theta_cone_low, theta_cone_hi, E_iso);
 
-        if(theta_c_arr != NULL)
+        if(theta_c_arr )
             theta_c_arr[i] = theta_c;
-        if(E_iso_arr != NULL)
+        if(E_iso_arr )
             E_iso_arr[i] = E_iso;
 
         if(E_iso <= 0.0)
@@ -1390,6 +1381,58 @@ double intensity(double theta, double phi, double tobs, double nuobs,
                         pars->ksi_N, pars->spec_type);
 
     return I;
+}
+
+double calc_gamma_shock(double theta, double phi, double tobs, double nuobs,
+                double theta_obs, double theta_cone_hi, double theta_cone_low,
+                struct fluxParams *pars)
+{
+    int remakeMu = 0;
+    if(tobs != pars->t_obs)
+        remakeMu = 1;
+    set_obs_params(pars, tobs, nuobs, theta_obs, theta_cone_hi, 
+                    theta_cone_low);
+
+    if(remakeMu)
+        make_mu_table(pars);
+
+    double mu = cos(theta)*cos(theta_obs)
+                    + sin(theta)*sin(theta_obs)*cos(phi);
+
+    int ia = searchSorted(mu, pars->mu_table, pars->table_entries);
+    int ib = ia + 1;
+    double t_e = interpolateLin(ia, ib, mu, pars->mu_table,
+                                pars->t_table, pars->table_entries);
+    t_e = check_t_e(t_e, mu, pars->t_obs, pars->mu_table, 
+                                pars->table_entries);
+    if(t_e < 0.0)
+    {
+        char msg[MSG_LEN];
+        int c = 0;
+        c += snprintf(msg, MSG_LEN-c,
+                     "BAD t_e: %.6lf Eiso=%.3le n0=%.3le thetah=%.3le\n",
+                     t_e, pars->E_iso, pars->n_0, pars->theta_h);
+        c += snprintf(msg+c, MSG_LEN-c,
+                      "    theta_obs=%.3lf phi=%.3lf theta=%.3lf mu=%.3lf\n",
+                      pars->theta_obs, pars->phi, pars->theta, mu);
+        c += snprintf(msg+c, MSG_LEN-c,
+                      "    L0=%.3le q=%.3lf ts=%.3le\n",
+                      pars->L0, pars->q, pars->ts);
+        c += snprintf(msg+c, MSG_LEN-c,
+                      "    t[0]=%.3le t[-1]=%.3le R[0]=%.3le R[-1]=%.3le\n",
+                      pars->t_table[0], pars->t_table[pars->table_entries-1],
+                      pars->R_table[0], pars->R_table[pars->table_entries-1]);
+        c += snprintf(msg+c, MSG_LEN-c,
+                      "    u[0]=%.3le u[-1]=%.3le th[0]=%.3le th[-1]=%.3le\n",
+                      pars->u_table[0], pars->u_table[pars->table_entries-1],
+                      pars->th_table[0], pars->th_table[pars->table_entries-1]);
+        set_error(pars, msg);
+        return 0.0;
+    }
+    double u = interpolateLog(ia, ib, t_e, pars->t_table,
+                                pars->u_table, pars->table_entries);
+    double us = shockVel(u);
+    return us;
 }
 
 void shockVals(double theta, double phi, double tobs,
@@ -2416,59 +2459,59 @@ void set_error(struct fluxParams *pars, char msg[])
 
 void free_fluxParams(struct fluxParams *pars)
 {
-    if(pars->t_table != NULL)
+    if(pars->t_table )
     {
         free(pars->t_table);
         pars->t_table = NULL;
     }
-    if(pars->R_table != NULL)
+    if(pars->R_table )
     {
         free(pars->R_table);
         pars->R_table = NULL;
     }
-    if(pars->u_table != NULL)
+    if(pars->u_table )
     {
         free(pars->u_table);
         pars->u_table = NULL;
     }
-    if(pars->th_table != NULL)
+    if(pars->th_table )
     {
         free(pars->th_table);
         pars->th_table = NULL;
     }
-    if(pars->mu_table != NULL)
+    if(pars->mu_table )
     {
         free(pars->mu_table);
         pars->mu_table = NULL;
     }
 
-    if(pars->t_table_inner != NULL)
+    if(pars->t_table_inner )
     {
         free(pars->t_table_inner);
         pars->t_table_inner = NULL;
     }
-    if(pars->R_table_inner != NULL)
+    if(pars->R_table_inner )
     {
         free(pars->R_table_inner);
         pars->R_table_inner = NULL;
     }
-    if(pars->u_table_inner != NULL)
+    if(pars->u_table_inner )
     {
         free(pars->u_table_inner);
         pars->u_table_inner = NULL;
     }
-    if(pars->th_table_inner != NULL)
+    if(pars->th_table_inner )
     {
         free(pars->th_table_inner);
         pars->th_table_inner = NULL;
     }
-    if(pars->mu_table_inner != NULL)
+    if(pars->mu_table_inner )
     {
         free(pars->mu_table_inner);
         pars->mu_table_inner = NULL;
     }
 
-    if(pars->error_msg != NULL)
+    if(pars->error_msg )
     {
         free(pars->error_msg);
         pars->error_msg = NULL;
