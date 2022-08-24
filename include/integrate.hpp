@@ -1,9 +1,11 @@
-#ifndef AFTERGLOWPY_INTEGRATE_HPP
-#define AFTERGLOWPY_INTEGRATE_HPP
+#ifndef INTEGRATE_HPP
+#define INTEGRATE_HPP
 
 #include "interval.hpp"
 #include <functional>
 #include <vector>
+#include <iostream>
+
 /*
  * Various routines for integrating 1D functions.
  * trap() and simp() are fixed stencil implementations of the Trapezoid Rule
@@ -126,7 +128,7 @@ namespace afterglowpy
             void *args, 
             int *Neval,
             double *eps, 
-            struct Mesh3 *mout, 
+            struct mesh::Mesh3 *mout, 
             int verbose,
             std::function<int(void *)> errf, 
             double *pfa, 
@@ -161,7 +163,7 @@ namespace afterglowpy
             void *args, 
             int *Neval,
             double *eps, 
-            struct Mesh5 *mout, 
+            struct mesh::Mesh5 *mout, 
             int verbose,
             std::function<int(void*)> errf,
             double *pfa, 
@@ -199,7 +201,7 @@ namespace afterglowpy
             void *args, 
             int *Neval,
             double *eps, 
-            struct Mesh5 *mout, 
+            struct mesh::Mesh5 *mout, 
             int verbose,
             std::function<int(void *)> errf,
             double *pfa, 
@@ -387,14 +389,14 @@ namespace afterglowpy
             double xa, 
             double xb, 
             int Nmax,
-            std::function<int(std::function<double(double, void*)> func, void *, Interval&, std::function<int(void *)> errf)> processInterval,
-            std::function<int(std::function<double(double, void*)> func, void *, Interval&, Interval&, Interval&, std::function<int(void *)> errf)> splitInterval,
+            std::function<int(std::function<double(double, void*)> func, void *, mesh::Interval&, std::function<int(void *)> errf)> processInterval,
+            std::function<int(std::function<double(double, void*)> func, void *, mesh::Interval&, mesh::Interval&, mesh::Interval&, std::function<int(void *)> errf)> splitInterval,
             double atol, 
             double rtol, 
             void *args, 
             int *Neval,
             double *eps, 
-            Mesh *mout, 
+            mesh::Mesh *mout, 
             int verbose,
             std::function<int(void *)> errf);
 
@@ -425,15 +427,15 @@ namespace afterglowpy
             double xa, 
             double xb, 
             int Nmax,
-            std::function<int(std::function<double(double, void*)> func, void *, Interval3&, std::function<int(void *)> errf, double *pfa, double *pfb)> initInterval,
-            std::function<int(std::function<double(double, void*)> func, void *, Interval3&, std::function<int(void *)> errf)> processInterval,
-            std::function<int(std::function<double(double, void*)> func, void *, Interval3&, Interval3&, Interval3&, std::function<int(void *)> errf)> splitInterval,
+            std::function<int(std::function<double(double, void*)> func, void *, mesh::Interval3&, std::function<int(void *)> errf, double *pfa, double *pfb)> initInterval,
+            std::function<int(std::function<double(double, void*)> func, void *, mesh::Interval3&, std::function<int(void *)> errf)> processInterval,
+            std::function<int(std::function<double(double, void*)> func, void *, mesh::Interval3&, mesh::Interval3&, mesh::Interval3&, std::function<int(void *)> errf)> splitInterval,
             double atol, 
             double rtol, 
             void *args, 
             int *Neval,
             double *eps, 
-            Mesh3 *mout, 
+            mesh::Mesh3 *mout, 
             int verbose,
             std::function<int(void *)> errf,
             double *pfa, 
@@ -466,15 +468,15 @@ namespace afterglowpy
             double xa, 
             double xb, 
             int Nmax,
-            std::function<int(std::function<double(double, void*)> func, void *, Interval5&, std::function<int(void *)> errf, double *pfa, double *pfb)> initInterval,
-            std::function<int(std::function<double(double, void*)> func, void *, Interval5&, std::function<int(void *)> errf)> processInterval,
-            std::function<int(std::function<double(double, void*)> func, void *, Interval5&, Interval5&, Interval5&, std::function<int(void *)> errf)> splitInterval,
+            std::function<int(std::function<double(double, void*)> func, void *, mesh::Interval5&, std::function<int(void *)> errf, double *pfa, double *pfb)> initInterval,
+            std::function<int(std::function<double(double, void*)> func, void *, mesh::Interval5&, std::function<int(void *)> errf)> processInterval,
+            std::function<int(std::function<double(double, void*)> func, void *, mesh::Interval5&, mesh::Interval5&, mesh::Interval5&, std::function<int(void *)> errf)> splitInterval,
             double atol, 
             double rtol, 
             void *args, 
             int *Neval,
             double *eps, 
-            Mesh5 *mout, 
+            mesh::Mesh5 *mout, 
             int verbose,
             std::function<int(void *)> errf,
             double *pfa, 
@@ -507,22 +509,21 @@ namespace afterglowpy
             double xa, 
             double xb, 
             int Nmax,
-            std::function<int(std::function<double(double, void*)> func, void *, Interval9&, std::function<int(void *)> errf, double *pfa, double *pfb)> initInterval,
-            std::function<int(std::function<double(double, void*)> func, void *, Interval9&, std::function<int(void *)> errf)> processInterval,
-            std::function<int(std::function<double(double, void*)> func, void *, Interval9&, Interval9&, Interval9&, std::function<int(void *)> errf)> splitInterval,
+            std::function<int(std::function<double(double, void*)> func, void *, mesh::Interval9&, std::function<int(void *)> errf, double *pfa, double *pfb)> initInterval,
+            std::function<int(std::function<double(double, void*)> func, void *, mesh::Interval9&, std::function<int(void *)> errf)> processInterval,
+            std::function<int(std::function<double(double, void*)> func, void *, mesh::Interval9&, mesh::Interval9&, mesh::Interval9&, std::function<int(void *)> errf)> splitInterval,
             double atol, 
             double rtol, 
             void *args, 
             int *Neval,
             double *eps, 
-            Mesh9 *mout, 
+            mesh::Mesh9 *mout, 
             int verbose,
             std::function<int(void *)> errf,
             double *pfa, 
             double *pfb);
 
         //=====================================================================================
-
         /**
          * @brief 
          * 
@@ -537,7 +538,7 @@ namespace afterglowpy
         int trapInitInterval(
             std::function<double(double, void *)> func,
             void *args,
-            Interval3 &i,
+            mesh::Interval3 &i,
             std::function<int(void *)> errf,
             double *pfa,
             double *pfb);
@@ -554,7 +555,7 @@ namespace afterglowpy
         int trapProcessInterval(
             std::function<double(double, void *)> func,
             void *args,
-            Interval3 &i,
+            mesh::Interval3 &i,
             std::function<int(void *)> errf);
 
         /**
@@ -571,9 +572,9 @@ namespace afterglowpy
         int trapSplitInterval(
             std::function<double(double, void *)> func,
             void *args,
-            Interval3 &i0,
-            Interval3 &i1,
-            Interval3 &i2,
+            mesh::Interval3 &i0,
+            mesh::Interval3 &i1,
+            mesh::Interval3 &i2,
             std::function<int(void *)> errf);
 
         /**
@@ -590,7 +591,7 @@ namespace afterglowpy
         int simpInitInterval(
             std::function<double(double, void *)> func,
             void *args,
-            Interval5 &i,
+            mesh::Interval5 &i,
             std::function<int(void *)> errf,
             double *pfa,
             double *pfb);
@@ -607,7 +608,7 @@ namespace afterglowpy
         int simpProcessInterval(
             std::function<double(double, void *)> func,
             void *args,
-            Interval5 &i,
+            mesh::Interval5 &i,
             std::function<int(void *)> errf);
 
         /**
@@ -624,9 +625,9 @@ namespace afterglowpy
         int simpSplitInterval(
             std::function<double(double, void *)> func,
             void *args,
-            Interval5 &i0,
-            Interval5 &i1,
-            Interval5 &i2,
+            mesh::Interval5 &i0,
+            mesh::Interval5 &i1,
+            mesh::Interval5 &i2,
             std::function<int(void *)> errf);
 
         /**
@@ -643,7 +644,7 @@ namespace afterglowpy
         int trapNLInitInterval(
             std::function<double(double, void *)> func,
             void *args,
-            Interval5 &i,
+            mesh::Interval5 &i,
             std::function<int(void *)> errf,
             double *pfa,
             double *pfb);
@@ -660,7 +661,7 @@ namespace afterglowpy
         int trapNLProcessInterval(
             std::function<double(double, void *)> func,
             void *args,
-            Interval5 &i,
+            mesh::Interval5 &i,
             std::function<int(void *)> errf);
 
         /**
@@ -677,9 +678,9 @@ namespace afterglowpy
         int trapNLSplitInterval(
             std::function<double(double, void *)> func,
             void *args,
-            Interval5 &i0,
-            Interval5 &i1,
-            Interval5 &i2,
+            mesh::Interval5 &i0,
+            mesh::Interval5 &i1,
+            mesh::Interval5 &i2,
             std::function<int(void *)> errf);
         /**
          * @brief 
@@ -695,7 +696,7 @@ namespace afterglowpy
         int cadreInitInterval(
             std::function<double(double, void *)> func,
             void *args,
-            Interval9 &i,
+            mesh::Interval9 &i,
             std::function<int(void *)> errf,
             double *pfa,
             double *pfb);
@@ -712,7 +713,7 @@ namespace afterglowpy
         int cadreProcessInterval(
             std::function<double(double, void *)> func,
             void *args,
-            Interval9 &i,
+            mesh::Interval9 &i,
             std::function<int(void *)> errf);
 
         /**
@@ -729,9 +730,9 @@ namespace afterglowpy
         int cadreSplitInterval(
             std::function<double(double, void *)> func,
             void *args,
-            Interval9 &i0,
-            Interval9 &i1,
-            Interval9 &i2,
+            mesh::Interval9 &i0,
+            mesh::Interval9 &i1,
+            mesh::Interval9 &i2,
             std::function<int(void *)> errf);
 
         /**
@@ -746,7 +747,7 @@ namespace afterglowpy
         int gk49ProcessInterval(
             std::function<double(double, void *)> func,
             void *args,
-            Interval &i,
+            mesh::Interval &i,
             std::function<int(void *)> errf);
 
         /**
@@ -763,9 +764,9 @@ namespace afterglowpy
         int gk49SplitInterval(
             std::function<double(double, void *)> func,
             void *args,
-            Interval &i0,
-            Interval &i1,
-            Interval &i2,
+            mesh::Interval &i0,
+            mesh::Interval &i1,
+            mesh::Interval &i2,
             std::function<int(void *)> errf);
         /**
          * @brief 
@@ -779,7 +780,7 @@ namespace afterglowpy
         int gk715ProcessInterval(
             std::function<double(double, void *)> func,
             void *args,
-            Interval &i,
+            mesh::Interval &i,
             std::function<int(void *)> errf);
 
         /**
@@ -796,9 +797,9 @@ namespace afterglowpy
         int gk715SplitInterval(
             std::function<double(double, void *)> func,
             void *args,
-            Interval &i0,
-            Interval &i1,
-            Interval &i2,
+            mesh::Interval &i0,
+            mesh::Interval &i1,
+            mesh::Interval &i2,
             std::function<int(void *)> errf);
         /**
          * @brief 
@@ -812,7 +813,7 @@ namespace afterglowpy
         int gk1021ProcessInterval(
             std::function<double(double, void *)> func,
             void *args,
-            Interval &i,
+            mesh::Interval &i,
             std::function<int(void *)> errf);
 
         /**
@@ -829,9 +830,9 @@ namespace afterglowpy
         int gk1021SplitInterval(
             std::function<double(double, void *)> func,
             void *args,
-            Interval &i0,
-            Interval &i1,
-            Interval &i2,
+            mesh::Interval &i0,
+            mesh::Interval &i1,
+            mesh::Interval &i2,
             std::function<int(void *)> errf);
 
         /**

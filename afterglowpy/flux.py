@@ -1,5 +1,5 @@
 from . import cocoon
-from . import jet
+from ..src import jet
 import numpy as np
 import warnings
 
@@ -180,7 +180,7 @@ def fluxDensity(t, nu, *args, **kwargs):
     LO = argsDict.pop('LO') if 'LO' in argsDict else 0.0
     LX = argsDict.pop('LX') if 'LX' in argsDict else 0.0
     tAdd = argsDict.pop('tAdd') if 'tAdd' in argsDict else 0.0
-
+    
     # timeA = time.time()
 
     Fnu = np.empty(tz.shape)

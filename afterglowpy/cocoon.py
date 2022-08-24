@@ -1,8 +1,8 @@
 import math
 import numpy as np
 import scipy.integrate as integrate
-from . import shock
-from . import jet
+from ..src import shock
+from ..src import jet
 
 c = 2.99792458e10
 me = 9.1093897e-28

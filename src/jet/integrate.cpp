@@ -195,10 +195,9 @@ namespace afterglowpy
             int verbose, 
             std::function<int (void *)> errf,
             double *pfa, 
-            double *pfb
-        )
+            double *pfb)
         {
-            double R[kmax];
+            double R[kmax] ;
 
             int m, k, k0, Nk;
             long fpm;
@@ -212,28 +211,29 @@ namespace afterglowpy
                 fa = func(xa, args);
                 if(errf(args))
                     return 0.0;
-            } else {
-                fa = *pfa;
             }
+            else
+                fa = *pfa;
 
             if(!pfb)
             {
                 fb = func(xb, args);
                 if(errf(args))
                     return 0.0;
-            } else {
-                fb = *pfb;
             }
+            else
+                fb = *pfb;
+
             hk = xb - xa;
             Nk = 1;
-            R[kmax-1] = 0.5*(xb-xa)*(fa + fb);
+            R[kmax - 1] = 0.5*(xb-xa)*(fa + fb);
 
             if(Neval)
                 *Neval = 2;
 
-            for(k=1; k < kmax; k++)
+            for(k=1; k<kmax;  k++)
             {
-                k0 = kmax-k-1;
+                k0 = kmax - k - 1;
                 hk *= 0.5;
                 Nk *= 2;
 
@@ -245,10 +245,10 @@ namespace afterglowpy
                         return 0.0;
                 }
                 R[k0] = 0.5*R[k0+1] + hk*Rp;
-                if(Neval)
+                if(Neval != NULL)
                     *Neval += Nk/2;
 
-                double lastVal = R[kmax-1];
+                double lastVal = R[kmax - 1];
                 fpm = 1;
                 for(m=1; m<=k; m++)
                 {
@@ -256,21 +256,21 @@ namespace afterglowpy
                     err = (R[k0+m-1] - R[k0+m]) / (fpm - 1);
                     R[k0+m] = (fpm*R[k0+m-1] - R[k0+m]) / (fpm - 1);
                 }
-                //err = (R[kmax-1] - R[0]) / (fpm - 1);
+                //err = (R[kmax - 1] - R[0]) / (fpm - 1);
 
-                double fracChange = std::abs((R[kmax-1] - lastVal) / lastVal);
+                double fracChange = fabs((R[kmax - 1] - lastVal) / lastVal);
 
-                if(eps)
+                if(eps != NULL)
                     *eps = err;
                 if(verbose)
                     printf("level %d:  Neval=%d  I=%.6lg  fracDelta=%.3lg"
                         " err=%.6lg  tol=%.6lg\n",
-                            k, Nk+1, R[kmax-1], fracChange, err, atol+rtol*std::abs(R[0]));
+                            k, Nk+1, R[kmax - 1], fracChange, err, atol+rtol*fabs(R[0]));
 
                 //printf("      k%d: I=%.6le err=%.6le frac=%.3le\n", k, R[0], err, 
-                //        std::abs(err) / (atol + rtol*std::abs(R[0])));
+                //        fabs(err) / (atol + rtol*fabs(R[0])));
 
-                if((std::abs(err) < atol + rtol*std::abs(R[kmax-1]))
+                if((fabs(err) < atol + rtol*fabs(R[kmax - 1]))
                         && fracChange < maxFracChange)
                     break;
 
@@ -278,55 +278,7 @@ namespace afterglowpy
                     break;
             }
 
-            return R[kmax-1];
-        }
-
-        double trap_adapt(
-            std::function<double(double, void*)> func,
-            double xa, 
-            double xb, 
-            int Nmax,
-            double atol, 
-            double rtol, 
-            void *args, 
-            int *Neval,
-            double *eps, 
-            Mesh3 *mout, 
-            int verbose,
-            std::function<int(void *)> errf, 
-            double *pfa, 
-            double *pfb
-        )
-        {
-            double I = m3_adapt(func, xa, xb, Nmax, trapInitInterval,
-                                trapProcessInterval, trapSplitInterval,
-                                atol, rtol, args, Neval, eps, mout, verbose, errf,
-                                pfa, pfb);
-            return I;
-        }
-
-        double trapNL_adapt(
-            std::function<double(double, void*)> func,
-            double xa, 
-            double xb,
-            int Nmax,
-            double atol, 
-            double rtol, 
-            void *args, 
-            int *Neval,
-            double *eps, 
-            Mesh5 *mout, 
-            int verbose,
-            std::function<int(void *)> errf,
-            double *pfa, 
-            double *pfb
-        )
-        {
-            double I = m5_adapt(func, xa, xb, Nmax, trapNLInitInterval,
-                                trapNLProcessInterval, trapNLSplitInterval,
-                                atol, rtol, args, Neval, eps, mout, verbose, errf,
-                                pfa, pfb);
-            return I;
+            return R[kmax - 1];
         }
 
         double simp_adapt(
@@ -499,6 +451,224 @@ namespace afterglowpy
             return I;
         }
 
+        double trap_adapt(
+            std::function<double(double, void*)> func,
+            double xa, 
+            double xb, 
+            int Nmax,
+            double atol, 
+            double rtol, 
+            void *args, 
+            int *Neval,
+            double *eps, 
+            Mesh3 *mout, 
+            int verbose,
+            std::function<int(void *)> errf, 
+            double *pfa, 
+            double *pfb
+        )
+        {
+            double I = m3_adapt(func, xa, xb, Nmax, nullptr,
+                                nullptr, nullptr,
+                                atol, rtol, args, Neval, eps, mout, verbose, errf,
+                                pfa, pfb);
+            return I;
+        }
+
+        double trapNL_adapt(
+            std::function<double(double, void*)> func,
+            double xa, 
+            double xb,
+            int Nmax,
+            double atol, 
+            double rtol, 
+            void *args, 
+            int *Neval,
+            double *eps, 
+            Mesh5 *mout, 
+            int verbose,
+            std::function<int(void *)> errf,
+            double *pfa, 
+            double *pfb
+        )
+        {
+            double I = m5_adapt(func, xa, xb, Nmax, trapNLInitInterval,
+                                trapNLProcessInterval, trapNLSplitInterval,
+                                atol, rtol, args, Neval, eps, mout, verbose, errf,
+                                pfa, pfb);
+            return I;
+        }
+
+        // double simp_adapt(
+        //     std::function<double(double, void*)> func,
+        //     double xa,
+        //     double xb,
+        //     int Nmax,
+        //     double atol,
+        //     double rtol, 
+        //     void *args, 
+        //     int *Neval,
+        //     double *eps, 
+        //     Mesh5 *mout, 
+        //     int verbose,
+        //     std::function<int(void*)> errf,
+        //     double *pfa, 
+        //     double *pfb
+        // )
+        // {
+        //     double I = m5_adapt(func, xa, xb, Nmax, simpInitInterval,
+        //                         simpProcessInterval, simpSplitInterval,
+        //                         atol, rtol, args, Neval, eps, mout, verbose, errf,
+        //                         pfa, pfb);
+        //     return I;
+        // }
+
+        // double hybrid_adapt(
+        //     std::function<double(double, void*)> func,
+        //     double xa, 
+        //     double xb,
+        //     int Nmax,
+        //     double atol, 
+        //     double rtol, 
+        //     void *args, 
+        //     int *Neval,
+        //     double *eps, 
+        //     int verbose,
+        //     std::function<int(void *)> errf,
+        //     double *pfa, 
+        //     double *pfb
+        // )
+        // {
+        //     double I, fa, fb;
+
+        //     //Compute f at endpoints
+        //     if(!pfa)
+        //     {
+        //         fa = func(xa, args);
+        //         if(errf(args))
+        //             return 0.0;
+        //     }
+        //     else
+        //         fa = *pfa;
+
+        //     if(!pfb)
+        //     {
+        //         fb = func(xb, args);
+        //         if(errf(args))
+        //             return 0.0;
+        //     }
+        //     else
+        //         fb = *pfb;
+
+        //     double ratio = std::abs(fa/fb);
+
+        //     double NLrtol = 1.0; //9.0e-5;
+
+        //     // If there's a large gradient, use an adaptive scheme.
+        //     if(ratio > 1e6|| ratio < 1e-6)
+        //     {
+        //         //Adaptive Simpson's rule is more efficient but less robust,
+        //         // requires a small error tolerance
+        //         if(rtol < NLrtol)
+        //             I = simp_adapt(func, xa, xb, Nmax, atol, rtol, args, Neval, eps,
+        //                         NULL, verbose, errf, &fa, &fb);
+        //         //The non-linear scheme is more robust, but less efficient. Useful
+        //         //for large tolerances, where Simpson's rule under-estimates the error
+        //         else
+        //             I = trapNL_adapt(func, xa, xb, Nmax, atol, rtol, args, Neval, eps,
+        //                             NULL, verbose, errf, &fa, &fb);
+        //     }
+        //     else
+        //         //If the gradient is not too big, Romberg will converge the fastest.
+        //         I = romb(func, xa, xb, Nmax, atol, rtol, args, Neval, eps, verbose, errf,
+        //                 &fa, &fb);
+
+        //     return I;
+        // }
+
+        // double cadre_adapt(
+        //     std::function<double(double, void*)> func,
+        //     double xa, 
+        //     double xb,
+        //     int Nmax,
+        //     double atol, 
+        //     double rtol, 
+        //     void *args, 
+        //     int *Neval,
+        //     double *eps, 
+        //     int verbose,
+        //     std::function<int(void *)> errf,
+        //     double *pfa, 
+        //     double *pfb
+        // )
+        // {
+        //     double I = m9_adapt(func, xa, xb, Nmax, cadreInitInterval,
+        //                         cadreProcessInterval, cadreSplitInterval,
+        //                         atol, rtol, args, Neval, eps, nullptr, verbose, errf,
+        //                         pfa, pfb);
+        //     return I;
+        // }
+
+        // double gk49_adapt(
+        //     std::function<double(double, void*)> func,
+        //     double xa, 
+        //     double xb,
+        //     int Nmax,
+        //     double atol, 
+        //     double rtol, 
+        //     void *args, 
+        //     int *Neval,
+        //     double *eps, 
+        //     int verbose,
+        //     std::function<int(void *)> errf
+        // )
+        // {
+        //     double I = m_adapt(func, xa, xb, Nmax,
+        //                         gk49ProcessInterval, gk49SplitInterval,
+        //                         atol, rtol, args, Neval, eps, NULL, verbose, errf);
+        //     return I;
+        // }
+
+        // double gk715_adapt(
+        //     std::function<double(double, void*)> func,
+        //     double xa, 
+        //     double xb,
+        //     int Nmax,
+        //     double atol, 
+        //     double rtol, 
+        //     void *args, 
+        //     int *Neval,
+        //     double *eps, 
+        //     int verbose,
+        //     std::function<int(void *)> errf
+        // )
+        // {
+        //     double I = m_adapt(func, xa, xb, Nmax,
+        //                         gk715ProcessInterval, gk715SplitInterval,
+        //                         atol, rtol, args, Neval, eps, NULL, verbose, errf);
+        //     return I;
+        // }
+
+        // double gk1021_adapt(
+        //     std::function<double(double, void*)> func,
+        //     double xa, 
+        //     double xb,
+        //     int Nmax,
+        //     double atol, 
+        //     double rtol, 
+        //     void *args, 
+        //     int *Neval,
+        //     double *eps, 
+        //     int verbose,
+        //     std::function<int(void *)> errf
+        // )
+        // {
+        //     double I = m_adapt(func, xa, xb, Nmax,
+        //                         gk1021ProcessInterval, gk1021SplitInterval,
+        //                         atol, rtol, args, Neval, eps, NULL, verbose, errf);
+        //     return I;
+        // }
+        
         int trapInitInterval(
             std::function<double(double, void *)> func,
             void *args,
@@ -1313,31 +1483,27 @@ namespace afterglowpy
             double xa, 
             double xb, 
             int Nmax,
-            std::function<int(std::function<double(double, void*)> func, void *, Interval &, std::function<int(void *)> errf)> processInterval,
-            std::function<int(std::function<double(double, void*)> func, void *, Interval &, Interval &, Interval &, std::function<int(void *)> errf)> splitInterval,
+            std::function<int(std::function<double(double, void*)> func, void *, mesh::Interval&, std::function<int(void *)> errf)> processInterval,
+            std::function<int(std::function<double(double, void*)> func, void *, mesh::Interval&, mesh::Interval&, mesh::Interval&, std::function<int(void *)> errf)> splitInterval,
             double atol, 
             double rtol, 
             void *args, 
             int *Neval,
             double *eps, 
-            Mesh *mout, 
+            mesh::Mesh *mout, 
             int verbose,
             std::function<int(void *)> errf
         )
         {
             Mesh m;
-            meshInit(&m);
-
-            Interval i = {.a=xa, .b=xb, .I=0, .err=0};
+            Interval i = {xa, xb, 0, 0};
             
-            int n = processInterval(func, args, &i, errf);
+            int n = processInterval(func, args, i, errf);
             if(errf(args))
             {
-                meshFree(&m);
                 return 0.0;
             }
-
-            meshInsert(&m, &i);
+            m.insert(i);
 
             double I = i.I;
             double err = i.err;
@@ -1346,24 +1512,22 @@ namespace afterglowpy
 
             while(n < Nmax && err >= atol + rtol*std::abs(I))
             {
-                meshExtract(&m, &i);
-
+                m.extract(i);
                 Interval i1;
                 Interval i2;
-                n += splitInterval(func, args, &i, &i1, &i2, errf);
+                n += splitInterval(func, args, i, i1, i2, errf);
                 if(errf(args))
                 {
-                    meshFree(&m);
                     return 0.0;
                 }
-                meshInsert(&m, &i1);
-                meshInsert(&m, &i2);
+                m.insert(i1);
+                m.insert(i2);
                 num_intervals++;
 
                 if(num_intervals == 2*last_check)
                 {
-                    err = meshTotalError(&m);
-                    I = meshTotalIntegral(&m);
+                    err        = m.totalError();
+                    I          = m.totalIntergral();
                     last_check = num_intervals;
                 }
                 else
@@ -1375,23 +1539,20 @@ namespace afterglowpy
                 if(verbose)
                     printf("Num Intervals: %d - I=%.12lg  err=%.3lg  tol=%.3lg"
                         "  meshOk=%d\n",
-                        num_intervals, I, err, atol + rtol*std::abs(I), meshCheck(&m));
+                        num_intervals, I, err, atol + rtol*std::abs(I), m.meshCheck());
             }
 
-            I = meshTotalIntegral(&m);
-
+            I = m.totalIntergral();
             if(Neval)
                 *Neval = n;
 
             if(eps)
             {
-                err = meshTotalError(&m);
+                err = m.totalError(); 
                 *eps = err;
             }
 
-            if(!mout)
-                meshFree(&m);
-            else
+            if(mout)
                 *mout = m;
 
             return I;
@@ -1411,7 +1572,7 @@ namespace afterglowpy
             void *args, 
             int *Neval,
             double *eps, 
-            std::vector<Mesh3> mout, 
+            Mesh3 *mout, 
             int verbose,
             std::function<int(void *)> errf,
             double *pfa, 
@@ -1419,79 +1580,69 @@ namespace afterglowpy
         )
         {
             Mesh3 m;
-            mesh3Init(&m);
-
-            Interval3 i = {.a=xa, .b=xb, .I=0, .err=0, .fa=0, .fm=0, .fb=0};
+            Interval3 i = {.a=xa, .b=xb, .I=0, .err=0, .fa=0, .fb=0, .fm=0};
             
-            int n = initInterval(func, args, &i, errf, pfa, pfb);
+            int n = initInterval(func, args, i, errf, pfa, pfb);
             if(errf(args))
             {
-                mesh3Free(&m);
                 return 0.0;
             }
             
-            n += processInterval(func, args, &i, errf);
+            n += processInterval(func, args, i, errf);
             if(errf(args))
             {
-                mesh3Free(&m);
                 return 0.0;
             }
 
-            mesh3Insert(&m, &i);
-
-            double I = i.I;
-            double err = i.err;
+            m.insert(i);
+            double I          = i.I;
+            double err        = i.err;
             int num_intervals = 1;
-            int last_check = 1;
+            int last_check    = 1;
 
             while(n < Nmax && err >= atol + rtol*std::abs(I))
             {
-                mesh3Extract(&m, &i);
-
+                m.extract(i);
                 Interval3 i1;
                 Interval3 i2;
-                n += splitInterval(func, args, &i, &i1, &i2, errf);
+                n += splitInterval(func, args, i, i1, i2, errf);
                 if(errf(args))
                 {
-                    mesh3Free(&m);
                     return 0.0;
                 }
-                mesh3Insert(&m, &i1);
-                mesh3Insert(&m, &i2);
+                m.insert(i1);
+                m.insert(i2);
                 num_intervals++;
 
                 if(num_intervals == 2*last_check)
                 {
-                    err = mesh3TotalError(&m);
-                    I = mesh3TotalIntegral(&m);
+                    err        = m.totalError();
+                    I          = m.totalIntergral();
                     last_check = num_intervals;
                 }
                 else
                 {
                     err += i1.err + i2.err - i.err;
-                    I += i1.I + i2.I - i.I;
+                    I   += i1.I + i2.I - i.I;
                 }
                 
                 if(verbose)
                     printf("Num Intervals: %d - I=%.12lg  err=%.3lg  tol=%.3lg"
                         "  meshOk=%d\n",
-                        num_intervals, I, err, atol + rtol*std::abs(I), mesh3Check(&m));
+                        num_intervals, I, err, atol + rtol*std::abs(I), m.meshCheck());
             }
-
-            I = mesh3TotalIntegral(&m);
+            I = m.totalIntergral();
 
             if(Neval)
                 *Neval = n;
 
             if(eps)
             {
-                err = mesh3TotalError(&m);
+                err = m.totalError();
                 *eps = err;
             }
 
-            if(!mout)
-                mesh3Free(&m);
-            else
+            if(mout)
                 *mout = m;
 
             return I;
@@ -1510,7 +1661,7 @@ namespace afterglowpy
             void *args, 
             int *Neval,
             double *eps, 
-            std::vector<Mesh5> mout, 
+            Mesh5 *mout, 
             int verbose,
             std::function<int(void *)> errf,
             double *pfa, 
@@ -1518,51 +1669,45 @@ namespace afterglowpy
         )
         {
             Mesh5 m;
-            mesh5Init(&m);
-
             Interval5 i = {.a=xa, .b=xb, .I=0, .err=0,
-                        .fa=0, .fl=0, .fm=0, .fr=0, .fb=0};
-            int n = initInterval(func, args, &i, errf, pfa, pfb);
+                        .fa=0, .fb=0, .fl=0, .fm=0, .fr=0};
+
+            int n = initInterval(func, args, i, errf, pfa, pfb);
             if(errf(args))
             {
-                mesh5Free(&m);
                 return 0.0;
             }
 
-            n += processInterval(func, args, &i, errf);
+            n += processInterval(func, args, i, errf);
             if(errf(args))
             {
-                mesh5Free(&m);
                 return 0.0;
             }
+            m.insert(i);
 
-            mesh5Insert(&m, &i);
-
-            double I = i.I;
-            double err = i.err;
+            double I          = i.I;
+            double err        = i.err;
             int num_intervals = 1;
-            int last_check = 1;
+            int last_check    = 1;
 
             while(n < Nmax && err > atol + rtol*std::abs(I))
             {
-                mesh5Extract(&m, &i);
-
+                m.extract(i);
                 Interval5 i1;
                 Interval5 i2;
-                n += splitInterval(func, args, &i, &i1, &i2, errf);
+                n += splitInterval(func, args, i, i1, i2, errf);
                 if(errf(args))
                 {
-                    mesh5Free(&m);
                     return 0.0;
                 }
-                mesh5Insert(&m, &i1);
-                mesh5Insert(&m, &i2);
+                m.insert(i1);
+                m.insert(i2);
                 num_intervals++;
 
                 if(num_intervals == 2*last_check)
                 {
-                    err = mesh5TotalError(&m);
-                    I = mesh5TotalIntegral(&m);
+                    err = m.totalError(); 
+                    I   = m.totalIntergral(); 
                     last_check = num_intervals;
                 }
                 else
@@ -1574,23 +1719,21 @@ namespace afterglowpy
                 if(verbose)
                     printf("Num Intervals: %d - I=%.12lg  err=%.3lg  tol=%.3lg"
                         "  meshOk=%d\n",
-                        num_intervals, I, err, atol + rtol*std::abs(I), mesh5Check(&m));
+                        num_intervals, I, err, atol + rtol*std::abs(I), m.meshCheck());
             }
 
-            I = mesh5TotalIntegral(&m);
+            I = m.totalIntergral();
 
             if(Neval)
                 *Neval = n;
 
             if(eps)
             {
-                err = mesh5TotalError(&m);
+                err = m.totalError();
                 *eps = err;
             }
 
-            if(!mout)
-                mesh5Free(&m);
-            else
+            if(mout)
                 *mout = m;
 
             return I;
@@ -1609,7 +1752,7 @@ namespace afterglowpy
             void *args, 
             int *Neval,
             double *eps, 
-            std::vector<Mesh9> mout, 
+            Mesh9 *mout, 
             int verbose,
             std::function<int(void *)> errf,
             double *pfa, 
@@ -1617,47 +1760,42 @@ namespace afterglowpy
         )
         {
             Mesh9 m;
-            mesh9Init(&m);
-
             Interval9 i = {.a=xa, .b=xb, .I=0, .err=0,
                         .fa=0, .fll=0, .fl=0, .flr=0, .fm=0,
                         .frl=0, .fr=0, .frr=0, .fb=0, .refinement=0};
-            int n = initInterval(func, args, &i, errf, pfa, pfb);
+            int n = initInterval(func, args, i, errf, pfa, pfb);
             if(errf(args))
             {
-                mesh9Free(&m);
                 return 0.0;
             }
 
-            n += processInterval(func, args, &i, errf);
+            n += processInterval(func, args, i, errf);
             if(errf(args))
             {
-                mesh9Free(&m);
                 return 0.0;
             }
+            m.insert(i);
 
-            mesh9Insert(&m, &i);
-
-            double I = i.I;
-            double err = i.err;
-            int num_intervals = 1;
+            double I           = i.I;
+            double err         = i.err;
+            int num_intervals  = 1;
             int num_iterations = 0;
-            int last_check = 0;
+            int last_check     = 0;
 
             if(verbose)
             {   
                 printf("   Num Intervals: %d - I=%.12lg  err=%.3lg  tol=%.3lg"
                     "  meshOk=%d\n",
-                    num_intervals, I, err, atol + rtol*std::abs(I), mesh9Check(&m));
-                interval9Write(&i, stdout);
+                    num_intervals, I, err, atol + rtol*std::abs(I), m.meshCheck());
+                m.intervalWrite(i, stdout);
             }
 
             while(n < Nmax && err > atol + rtol*std::abs(I))
             {
-                mesh9Extract(&m, &i);
+                m.extract(i);
 
                 if(verbose && num_iterations > 0)
-                    interval9Write(&i, stdout);
+                    m.intervalWrite(i, stdout);
 
                 double newI, newErr;
 
@@ -1666,13 +1804,12 @@ namespace afterglowpy
                     double oldI = i.I;
                     double olderr = i.err;
 
-                    n += processInterval(func, args, &i, errf);
+                    n += processInterval(func, args, i, errf);
                     if(errf(args))
                     {
-                        mesh9Free(&m);
                         return 0.0;
                     }
-                    mesh9Insert(&m, &i);
+                    m.insert(i);
 
                     err += i.err - olderr;
                     I += i.I - oldI;
@@ -1684,14 +1821,13 @@ namespace afterglowpy
                 {
                     Interval9 i1;
                     Interval9 i2;
-                    n += splitInterval(func, args, &i, &i1, &i2, errf);
+                    n += splitInterval(func, args, i, i1, i2, errf);
                     if(errf(args))
                     {
-                        mesh9Free(&m);
                         return 0.0;
                     }
-                    mesh9Insert(&m, &i1);
-                    mesh9Insert(&m, &i2);
+                    m.insert(i1);
+                    m.insert(i2);
                     num_intervals++;
                     
                     err += i1.err + i2.err - i.err;
@@ -1703,8 +1839,8 @@ namespace afterglowpy
 
                 if(num_iterations == 2*last_check)
                 {
-                    err = mesh9TotalError(&m);
-                    I = mesh9TotalIntegral(&m);
+                    err = m.totalError(); //(&m);
+                    I   = m.totalIntergral(); //mesh9TotalIntegral(&m);
                     last_check = num_intervals;
                 }
                 
@@ -1713,31 +1849,29 @@ namespace afterglowpy
                     printf("                   ---> %.12le +/- %.3le\n", newI, newErr);
                     printf("   Num Intervals: %d - I=%.12lg  err=%.3lg  tol=%.3lg"
                         "  meshOk=%d\n",
-                        num_intervals, I, err, atol + rtol*std::abs(I), mesh9Check(&m));
+                        num_intervals, I, err, atol + rtol*std::abs(I), m.meshCheck());
                 }
                 num_iterations++;
             }
 
-            I = mesh9TotalIntegral(&m);
+            I = m.totalIntergral();
 
             if(Neval)
                 *Neval = n;
 
             if(eps)
             {
-                err = mesh9TotalError(&m);
+                err  = m.totalError();
                 *eps = err;
             }
 
-            if(!mout)
-                mesh9Free(&m);
-            else
+            if(mout)
                 *mout = m;
 
             return I;
         }
 
-                int gk_compute(
+        int gk_compute(
             std::function<double(double, void *)> func,
             void *args,
             std::function<int(void*)> errf,
@@ -1770,14 +1904,14 @@ namespace afterglowpy
 
             for(n=0; n<ng; n++)
             {
-                fg[n] = f(c * xg[n] + z0, args);
+                fg[n] = func(c * xg[n] + z0, args);
                 count++;
                 if(errf(args))
                     return count;
             }
             for(n=0; n<nk; n++)
             {
-                fk[n] = f(c * xk[n] + z0, args);
+                fk[n] = func(c * xk[n] + z0, args);
                 count++;
                 if(errf(args))
                     return count;
@@ -1812,7 +1946,6 @@ namespace afterglowpy
             return count;
         }
 
-        
     } // namespace integrate
     
 } // namespace afterglowpy

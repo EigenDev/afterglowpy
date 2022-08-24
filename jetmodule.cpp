@@ -96,7 +96,7 @@ static PyMethodDef jetMethods[] = {
         find_jet_edge_docstring},
     {"error_out", (PyCFunction)error_out, METH_NOARGS, NULL},
     {NULL, NULL, 0, NULL}};
-
+    
 #if PY_MAJOR_VERSION >= 3
 
 static int jet_traverse(PyObject *m, visitproc visit, void *arg)
