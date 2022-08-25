@@ -321,7 +321,7 @@ static PyObject *jet_fluxDensity(PyObject *self, PyObject *args,
     int N = (int)PyArray_DIM(t_arr, 0);
     int Nnu = (int)PyArray_DIM(nu_arr, 0);
     int Nmask = 0;
-    if(mask_obj )
+    if(mask_obj)
         Nmask = (int)PyArray_DIM(mask_arr, 0);
 
     if(N != Nnu)

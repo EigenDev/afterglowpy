@@ -499,176 +499,6 @@ namespace afterglowpy
             return I;
         }
 
-        // double simp_adapt(
-        //     std::function<double(double, void*)> func,
-        //     double xa,
-        //     double xb,
-        //     int Nmax,
-        //     double atol,
-        //     double rtol, 
-        //     void *args, 
-        //     int *Neval,
-        //     double *eps, 
-        //     Mesh5 *mout, 
-        //     int verbose,
-        //     std::function<int(void*)> errf,
-        //     double *pfa, 
-        //     double *pfb
-        // )
-        // {
-        //     double I = m5_adapt(func, xa, xb, Nmax, simpInitInterval,
-        //                         simpProcessInterval, simpSplitInterval,
-        //                         atol, rtol, args, Neval, eps, mout, verbose, errf,
-        //                         pfa, pfb);
-        //     return I;
-        // }
-
-        // double hybrid_adapt(
-        //     std::function<double(double, void*)> func,
-        //     double xa, 
-        //     double xb,
-        //     int Nmax,
-        //     double atol, 
-        //     double rtol, 
-        //     void *args, 
-        //     int *Neval,
-        //     double *eps, 
-        //     int verbose,
-        //     std::function<int(void *)> errf,
-        //     double *pfa, 
-        //     double *pfb
-        // )
-        // {
-        //     double I, fa, fb;
-
-        //     //Compute f at endpoints
-        //     if(!pfa)
-        //     {
-        //         fa = func(xa, args);
-        //         if(errf(args))
-        //             return 0.0;
-        //     }
-        //     else
-        //         fa = *pfa;
-
-        //     if(!pfb)
-        //     {
-        //         fb = func(xb, args);
-        //         if(errf(args))
-        //             return 0.0;
-        //     }
-        //     else
-        //         fb = *pfb;
-
-        //     double ratio = std::abs(fa/fb);
-
-        //     double NLrtol = 1.0; //9.0e-5;
-
-        //     // If there's a large gradient, use an adaptive scheme.
-        //     if(ratio > 1e6|| ratio < 1e-6)
-        //     {
-        //         //Adaptive Simpson's rule is more efficient but less robust,
-        //         // requires a small error tolerance
-        //         if(rtol < NLrtol)
-        //             I = simp_adapt(func, xa, xb, Nmax, atol, rtol, args, Neval, eps,
-        //                         NULL, verbose, errf, &fa, &fb);
-        //         //The non-linear scheme is more robust, but less efficient. Useful
-        //         //for large tolerances, where Simpson's rule under-estimates the error
-        //         else
-        //             I = trapNL_adapt(func, xa, xb, Nmax, atol, rtol, args, Neval, eps,
-        //                             NULL, verbose, errf, &fa, &fb);
-        //     }
-        //     else
-        //         //If the gradient is not too big, Romberg will converge the fastest.
-        //         I = romb(func, xa, xb, Nmax, atol, rtol, args, Neval, eps, verbose, errf,
-        //                 &fa, &fb);
-
-        //     return I;
-        // }
-
-        // double cadre_adapt(
-        //     std::function<double(double, void*)> func,
-        //     double xa, 
-        //     double xb,
-        //     int Nmax,
-        //     double atol, 
-        //     double rtol, 
-        //     void *args, 
-        //     int *Neval,
-        //     double *eps, 
-        //     int verbose,
-        //     std::function<int(void *)> errf,
-        //     double *pfa, 
-        //     double *pfb
-        // )
-        // {
-        //     double I = m9_adapt(func, xa, xb, Nmax, cadreInitInterval,
-        //                         cadreProcessInterval, cadreSplitInterval,
-        //                         atol, rtol, args, Neval, eps, nullptr, verbose, errf,
-        //                         pfa, pfb);
-        //     return I;
-        // }
-
-        // double gk49_adapt(
-        //     std::function<double(double, void*)> func,
-        //     double xa, 
-        //     double xb,
-        //     int Nmax,
-        //     double atol, 
-        //     double rtol, 
-        //     void *args, 
-        //     int *Neval,
-        //     double *eps, 
-        //     int verbose,
-        //     std::function<int(void *)> errf
-        // )
-        // {
-        //     double I = m_adapt(func, xa, xb, Nmax,
-        //                         gk49ProcessInterval, gk49SplitInterval,
-        //                         atol, rtol, args, Neval, eps, NULL, verbose, errf);
-        //     return I;
-        // }
-
-        // double gk715_adapt(
-        //     std::function<double(double, void*)> func,
-        //     double xa, 
-        //     double xb,
-        //     int Nmax,
-        //     double atol, 
-        //     double rtol, 
-        //     void *args, 
-        //     int *Neval,
-        //     double *eps, 
-        //     int verbose,
-        //     std::function<int(void *)> errf
-        // )
-        // {
-        //     double I = m_adapt(func, xa, xb, Nmax,
-        //                         gk715ProcessInterval, gk715SplitInterval,
-        //                         atol, rtol, args, Neval, eps, NULL, verbose, errf);
-        //     return I;
-        // }
-
-        // double gk1021_adapt(
-        //     std::function<double(double, void*)> func,
-        //     double xa, 
-        //     double xb,
-        //     int Nmax,
-        //     double atol, 
-        //     double rtol, 
-        //     void *args, 
-        //     int *Neval,
-        //     double *eps, 
-        //     int verbose,
-        //     std::function<int(void *)> errf
-        // )
-        // {
-        //     double I = m_adapt(func, xa, xb, Nmax,
-        //                         gk1021ProcessInterval, gk1021SplitInterval,
-        //                         atol, rtol, args, Neval, eps, NULL, verbose, errf);
-        //     return I;
-        // }
-        
         int trapInitInterval(
             std::function<double(double, void *)> func,
             void *args,
@@ -990,8 +820,9 @@ namespace afterglowpy
                 if(errf(args))
                     return count;
             }
-            else
+            else {
                 i.fa = *pfa;
+            }
 
             if(!pfb)
             {
@@ -1854,6 +1685,8 @@ namespace afterglowpy
                 num_iterations++;
             }
 
+            // std::cout << m.N << ", " << Nmax << ", " << err << "\n";
+            // std::cin.get();
             I = m.totalIntergral();
 
             if(Neval)
@@ -1867,7 +1700,8 @@ namespace afterglowpy
 
             if(mout)
                 *mout = m;
-
+            
+            std::cout << I << ", " << Nmax << "\n";
             return I;
         }
 

@@ -1,11 +1,93 @@
-from . import cocoon
-from ..src import jet
-import numpy as np
-import warnings
+import jet_ext
+import numpy as np 
+import matplotlib.pyplot as plt 
+from enum import Enum 
 
+global_n = 100
+
+c = 2.99792458e10
+me = 9.1093897e-28
+mp = 1.6726231e-24
+h = 6.6260755e-27
+hbar = 1.05457266e-27
+ee = 4.803e-10
+sigmaT = 6.65e-25
+
+Msun = 1.98892e33
+cgs2mJy = 1.0e26
+mJy2cgs = 1.0e-26
+deg2rad = np.pi/180.0
+rad2deg = 180.0/np.pi
+day2sec = 86400.0
+sec2day = 1.0/day2sec
+parsec = 3.0857e18
+Hz2eV = 4.13566553853599e-15
+eV2Hz = 1.0/Hz2eV
+
+
+class Jet(Enum):
+    Cone           = -2,
+    TopHat         = -1,
+    Gaussian       = 0,
+    PowerLawCore   = 1,
+    GaussianCore   = 2,
+    Spherical      = 3,
+    PowerLaw       = 4,
+    Exponential    = 5,
+    Twocomponent   = 6,
+    Exponential2   = 7,
+    Ring           = 8,
+    
+default_params = {
+    "jet_type":  -1,
+    "spec_type":  0,
+    "theta_obs":  0.0,
+    "E_iso_core":  1.0e53,
+    "theta_h_core":  0.1,
+    "theta_h_wing":  0.4,
+    "b": 0.0,
+    "L0": 0.0,
+    "q": 0.0,
+    "ts": 0.0, 
+    "n_0": 1.0,
+    "p": 2.5,
+    "epsilon_E": 0.1,
+    "epsilon_B": 0.01,
+    "ksi_N": 1.0, 
+    "d_L": 1.0e27,
+
+    "latRes":  5,
+    "tRes":  1000,
+    "spread":  7,
+    "counterjet":  0,
+    "gamma_type":  "gamma_inf",
+    "g0": -1.0,
+    "E_core_global":  0.0,
+    "theta_core_global": 0.0,
+
+    "rtol_struct": 1.0e-2,
+    "rtol_theta" : 1.0e-2,
+    "rtol_phi": 1.0e-2,
+    "int_type": "int_cadre",
+    "nmax_phi": 1000,
+    "nmax_theta": 1000,
+    
+    "jetType": Jet.TopHat,
+    "specType": 0,
+    "thetaObs": 0,
+    "E0": 1e53,
+    "thetaCore": 0.1,
+    "n0": 1,
+    "epsilon_e": 0.1,
+    "epsilon_b": 0.1,
+    "xi_N": 1.0,
+    "theta_wing": 0.1,
+    "thetaWing": 0.1,
+    "mask": np.zeros(global_n),
+    "nmask": global_n,   
+}
 
 def fluxDensity(t, nu, *args, **kwargs):
-    
     """
     Compute the flux density F_nu of a GRB afterglow.
 
@@ -29,7 +111,7 @@ def fluxDensity(t, nu, *args, **kwargs):
 
     To call a spherical refreshed shock model with positional arguments::
 
-        Fnu = fluxDensity(t, nu, jet.Spherical, specType, uMax, uMin, Er, k,
+        Fnu = fluxDensity(t, nu, Jet.Spherical, specType, uMax, uMin, Er, k,
                           MFast_solar, L0, q, ts, n0, p, epsilon_e, epsilon_B,
                           xi_N, d_L, **Z)
 
@@ -41,10 +123,10 @@ def fluxDensity(t, nu, *args, **kwargs):
     nu : array_like or scalar
         Frequency of flux in observer frame, measured in Hz, same size as t.
     jetType : int
-        Code for type of jet. Model codes are available in ``afterglowpy.jet``
-        and include: ``jet.TopHat``, ``jet.Cone``, ``jet.Gaussian``,
-        ``jet.PowerLaw``, ``jet.GaussianCore``, ``jet.PowerLawCore``,
-        ``jet.Spherical`, and ``jet.Ring''`.
+        Code for type of Jet. Model codes are available in ``afterglowpy.jet``
+        and include: ``Jet.TopHat``, ``Jet.Cone``, ``Jet.Gaussian``,
+        ``Jet.PowerLaw``, ``Jet.GaussianCore``, ``Jet.PowerLawCore``,
+        ``Jet.Spherical`, and ``Jet.Ring''`.
     specType : int
         Code for type of spectrum.  Options are: 0 broken power law
         (Ryan+ 2020), 1 broken power law w/ inverse Compton cooling. Default: 0
@@ -57,10 +139,10 @@ def fluxDensity(t, nu, *args, **kwargs):
         Half opening angle of jet core in radians. Jet models only.
     thetaWing: float
         Outer truncation angle of the jet in radians. Ignored by
-        ``jet.TopHat``, jet models only.
+        ``Jet.TopHat``, jet models only.
     b: float
         Power law index of jet angular energy distribution. Only used by
-        ``jet.PowerLaw`` and ``jet.PowerLawCore``.
+        ``Jet.PowerLaw`` and ``Jet.PowerLawCore``.
     n0 : float
         Number density of protons in circumburst medium in cm^{-3}.
     p : float
@@ -118,7 +200,7 @@ def fluxDensity(t, nu, *args, **kwargs):
         thetaCore-sized interval. Defaults to 5.
     intType : int, optional
         Integration scheme to use when computing flux. Defaults to
-        ``jet.Cadre``. Changing this may result in longer run times or larger
+        ``Jet.Cadre``. Changing this may result in longer run times or larger
         than expected numerical errors.
     rtolStruct : float, optional
         Overall relative tolerance of flux integration for structured jets.
@@ -153,8 +235,8 @@ def fluxDensity(t, nu, *args, **kwargs):
     t, nu = checkTNu(t, nu)
 
     jetType = argsDict['jetType']
-
-    if jetType == jet.Spherical:
+    checkJetArgs(**argsDict)
+    if jetType == Jet.Spherical:
         checkCocoonArgs(**argsDict)
     else:
         checkJetArgs(**argsDict)
@@ -162,7 +244,7 @@ def fluxDensity(t, nu, *args, **kwargs):
     # arguments are good, full steam ahead!
     z = argsDict.pop('z') if 'z' in argsDict else 0.0
 
-    tz = t / (1+z)
+    tz  = t / (1+z)
     nuz = nu * (1+z)
 
     # Default spreading method
@@ -182,19 +264,30 @@ def fluxDensity(t, nu, *args, **kwargs):
     tAdd = argsDict.pop('tAdd') if 'tAdd' in argsDict else 0.0
     
     # timeA = time.time()
-
+    argsDict['ta'] = t.flat[0]
+    argsDict['tb'] = t.flat[-1]
     Fnu = np.empty(tz.shape)
-
-    if argsDict['jetType'] == jet.Spherical:
-        Fnu.flat[:] = cocoon.fluxDensity(tz.flat, nuz.flat, **argsDict)
-    else:
-        Fnu.flat[:] = jet.fluxDensity(tz.flat, nuz.flat, **argsDict)
+    Fnu.flat[:] = jet_ext.calc_flux_density_wrapper(
+        jet_type  = -1, 
+        spec_type = 1,
+        t         = tz.flatten(),
+        nu        = nuz.flatten(),
+        fnu       = Fnu.flatten(),
+        n         = global_n,
+        fp        = argsDict
+    )
+    print(Fnu)
+    zzz = input('')
+    # if argsDict['jetType'] == Jet.Spherical:
+    #     Fnu.flat[:] = cocoon.fluxDensity(tz.flat, nuz.flat, **argsDict)
+    # else:
+    #     Fnu.flat[:] = Jet.fluxDensity(tz.flat, nuz.flat, **argsDict)
     # timeB = time.time()
     # print("Eval took: {0:f} s".format(timeB - timeA))
 
     
     # Adding background luminosities.
-    L_to_flux = cocoon.cgs2mJy / (4*np.pi * argsDict['d_L']**2)
+    L_to_flux = cgs2mJy / ( 4 * np.pi * argsDict['d_L']**2)
 
 
     if LR > 0.0:
@@ -215,189 +308,6 @@ def fluxDensity(t, nu, *args, **kwargs):
     Fnu *= 1+z
 
     return Fnu
-
-
-def intensity(theta, phi, t, nu, *args, **kwargs):
-    """
-    Compute the intensity I_nu of a GRB afterglow.
-
-    Utiliizes the single shell approximation described in Ryan et al 2019
-    to compute the synchrotron emission from the forward shock of a blast
-    wave at the specified angular coordinates, times, and frequencies.
-
-    The returned intensity is that emitted by the blast wave, not that
-    directly observed from Earth.  To get the observed flux, integrate over
-    the surface of the blast wave in the frame of the burst.
-    
-        F_nu = \int d\Omega I_nu
-
-    Angular coordinates are in a spherical coordinate system, centered on the
-    burst, with z-axis aligned on the jet axis.
-
-    ``intensity`` takes many model-dependent parameters which are specified
-    via keyword arguments. It is recommended to collect these parameters in a
-    dictionary ``Z`` and call fluxDensity() by::
-
-        Inu = intensity(theta, phi, t, nu, **Z)
-
-    Alternately model parameters may be specified as positional arguments,
-    although this interface is **not recommended** and may be deprecated in
-    the future. To call a jetted model with positional and keyword arguments::
-
-        Inu = fluxDensity(theta, phi, t, nu, jetType, specType, thetaObs, E0,
-                          thetaCore, thetaWing, b, L0, q, ts, n0, p, epsilon_e,
-                          epsilon_B, xi_N, d_L, **Z)
-
-    This is currently only implemented for jetted models. Do not use with
-    ``jetType=jet.Spherical``.
-
-
-    Parameters 
-    ----------
-    theta: array_like or scalar
-        Polar angle from jet axis in radians. Scalar, or array of same shape
-        as phi, t, and nu.
-    phi: array_like or scalar
-        Azimuthal angle around jet axis in radians. Observer is at phi = 0.
-        Scalar, or array of same shape as theta, t, and nu.
-    t : array_like or scalar
-        Time since burst in observer frame, measured in seconds.
-    nu : array_like or scalar
-        Frequency of flux in observer frame, measured in Hz, same size as t.
-    jetType : int
-        Code for type of jet. Model codes are available in ``afterglowpy.jet``
-        and include: ``jet.TopHat``, ``jet.Cone``, ``jet.Gaussian``,
-        ``jet.PowerLaw``, ``jet.GaussianCore``, ``jet.PowerLawCore``, and
-        ``jet.Spherical``.
-    specType : int
-        Code for type of spectrum.  Options are: 0 broken power law
-        (Ryan+ 2020), 1 broken power law w/ inverse Compton cooling. Default: 0
-    thetaObs : float
-        Viewing angle in radians. Jet models only.
-    E0: float
-        Isotropic-equivalent energy along the jet axis in ergs. Jet models
-        only.
-    thetaCore: float
-        Half opening angle of jet core in radians. Jet models only.
-    thetaWing: float
-        Outer truncation angle of the jet in radians. Ignored by
-        ``jet.TopHat``, jet models only.
-    b: float
-        Power law index of jet angular energy distribution. Only used by
-        ``jet.PowerLaw`` and ``jet.PowerLawCore``.
-    n0 : float
-        Number density of protons in circumburst medium in cm^{-3}.
-    p : float
-        Power law index of relativistic electron energy distribution,
-        generally p > 2.
-    epsilon_e : float
-        Fraction of thermal energy in relativistic electrons, epsilon_e <= 1.
-    epsilon_B : float
-        Fraction of thermal energy in magnetic field, epsilon_B <= 1.
-    xi_N : float
-        Fraction of electrons that get accelerated, xi_N <= 1.
-    d_L : float
-        Luminosity distance to burst, in cm.
-    z : float, optional
-        Redshift of burst, defaults to 0.
-
-    L0: float, optional
-        Luminosity of energy injection, in erg/s.  Default 0.0.
-    q: float, optional
-        Power law index of energy injection: L = L0 (t/t0)^{-q}, t0 = 1 ks.
-        Default 0.0.
-    ts: float, optional
-        Time energy injection ends in burster frame, in seconds. Default 0.0.
-    g0 : float, optional
-        EXPERIMENTAL.  Initial Lorentz factor of outflow along jet axis,
-        defaults to -1 (unset, jet has deceleration radius 0). Do not use with
-        jet spreading enabled.
-
-    Other Parameters
-    ----------------
-
-    spread : {True, False}, optional
-        Whether to include jet spreading. Defaults to True.
-    counterjet : {'True', 'False'}, optional
-        Whether to include counterjet emission. Defaults to False.
-    tRes : int, optional
-        Time resolution, number of points per decade in t, for shock evolution.
-        Defaults to 1000.
-    latRes : int, optional
-        Lateral resolution of structured jet, number of conical sections per
-        thetaCore-sized interval. Defaults to 5.
-    intType : int, optional
-        ``fluxDensity()`` parameter ignored by ``intensity()``
-    rtolStruct : float, optional
-        ``fluxDensity()`` parameter ignored by ``intensity()``
-    rtolTheta : float, optional
-        ``fluxDensity()`` parameter ignored by ``intensity()``
-    rtolPhi : float, optional
-        ``fluxDensity()`` parameter ignored by ``intensity()``
-    NPhi : int, optional
-        ``fluxDensity()`` parameter ignored by ``intensity()``
-    NTheta : int, optional
-        ``fluxDensity()`` parameter ignored by ``intensity()``
-
-    Returns
-    -------
-    Inu : array
-        The specific intensity I_nu in the observer frame, same shape as
-        theta, phi, t, and nu.
-
-    Raises
-    ------
-
-    ValueError
-        If theta, phi, t, nu are the wrong shape or arguments take illegal
-        values.
-    """
-    
-    argsDict = parseArgs(args, kwargs)
-
-    # Check Arguments, will raise ValueError if args are bad
-    theta, phi, t, nu = checkThetaPhiTNu(theta, phi, t, nu)
-
-    jetType = argsDict['jetType']
-
-    if jetType == jet.Spherical:
-        checkCocoonArgs(**argsDict)
-    else:
-        checkJetArgs(**argsDict)
-
-    # arguments are good, full steam ahead!
-
-    z = argsDict.pop('z') if 'z' in argsDict else 0.0
-
-    tz = t / (1+z)
-    nuz = nu * (1+z)
-
-    # Default spreading method
-    if 'spread' in argsDict:
-        if argsDict['spread'] is True:
-            if jetType == -2 and 'thetaCoreGlobal' in argsDict:
-                argsDict['spread'] = 8
-            else:
-                argsDict['spread'] = 7
-    
-    # Intercept background luminosities, then ignore them.
-    LR = argsDict.pop('LR') if 'LR' in argsDict else 0.0
-    LO = argsDict.pop('LO') if 'LO' in argsDict else 0.0
-    LX = argsDict.pop('LX') if 'LX' in argsDict else 0.0
-    tAdd = argsDict.pop('tAdd') if 'tAdd' in argsDict else 0.0
-
-    Inu = np.empty(theta.shape)
-    Inu.flat[:] = jet.intensity(theta.flat, phi.flat, tz.flat, nuz.flat,
-                                **argsDict)
-
-    # K-correct the intensity
-    # I'm only using the flux correction here, which leaves the angular
-    # part of the intensity uncorrected.  Best be careful.
-
-    Inu *= 1+z
-
-    return Inu
-
 
 def checkTNu(t, nu):
     # Make sure t and nu are array_like or castable to an array.
@@ -478,9 +388,9 @@ def checkThetaPhiTNu(theta, phi, t, nu):
 
 def checkJetArgs(**argsDict):
 
-    for _, x in argsDict.items():
-        if not np.isfinite(x):
-            raise ValueError("All parameters must be finite")
+    # for _, x in argsDict.items():
+    #     if not np.isfinite(x):
+    #         raise ValueError("All parameters must be finite")
 
 
     jetType = argsDict['jetType']
@@ -501,9 +411,9 @@ def checkJetArgs(**argsDict):
         raise ValueError("theta_obs must be in [0.0, pi/2]")
     if E0 <= 0.0:
         raise ValueError("E0 must be positive")
-    if jetType != jet.Cone and (theta_c <= 0.0 or theta_c > 0.5*np.pi):
+    if jetType != Jet.Cone and (theta_c <= 0.0 or theta_c > 0.5*np.pi):
         raise ValueError("theta_c must be in (0.0, pi/2]")
-    if jetType == jet.Cone and (theta_c < 0.0 or theta_c > 0.5*np.pi):
+    if jetType == Jet.Cone and (theta_c < 0.0 or theta_c > 0.5*np.pi):
         raise ValueError("theta_c must be in [0.0, pi/2]")
     if n0 <= 0.0:
         raise ValueError("n0 must be positive")
@@ -522,7 +432,7 @@ def checkJetArgs(**argsDict):
 
     # Bounds on optional parameters
 
-    if jetType != jet.TopHat:
+    if jetType != Jet.TopHat:
         if 'thetaWing' not in argsDict:
             raise KeyError('This jet type requires thetaWing')
         else:
@@ -530,7 +440,7 @@ def checkJetArgs(**argsDict):
             if (theta_w <= 0.0 or theta_w > 0.5*np.pi):
                 raise ValueError("thetaWing must be in (0.0, pi/2]")
 
-    if jetType == jet.PowerLaw or jetType == jet.PowerLawCore:
+    if jetType == Jet.PowerLaw or jetType == Jet.PowerLawCore:
         if 'b' not in argsDict:
             raise KeyError('This jet type requires b')
         else:
@@ -567,7 +477,7 @@ def checkJetArgs(**argsDict):
             raise ValueError("z must be non-negative")
 
     # Model Specific bounds
-    if jetType == jet.Cone and argsDict['thetaCore'] > argsDict['thetaWing']:
+    if jetType == Jet.Cone and argsDict['thetaCore'] > argsDict['thetaWing']:
         raise ValueError("thetaWing must be larger than thetaCore"
                          "for cone model")
 
@@ -676,14 +586,17 @@ def parseArgs(args, kwargs):
 
     jetType = args[0]
 
-    if jetType == jet.Spherical:
-        argsDict.update(zip(sphKeys, args))
-    else:
-        argsDict.update(zip(jetKeys, args))
+    # if jetType == Jet.Spherical:
+    #     argsDict.update(zip(sphKeys, args))
+    # else:
+    #     argsDict.update(zip(jetKeys, args))
 
     return argsDict
 
+t    = np.linspace(0.1, 1000, global_n) * day2sec
+nu   = np.ones_like(t) * 1e9
+tday = t * sec2day
+a    = fluxDensity(t, nu, **default_params)
 
-
-
-
+plt.loglog(tday, a)
+plt.show()

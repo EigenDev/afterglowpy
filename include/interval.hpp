@@ -56,8 +56,6 @@ namespace afterglowpy
         struct Mesh : MeshBase<Interval>
         {
             using MeshBase<Interval>::MeshBase;
-            // Mesh();
-            // ~Mesh();
         };
 
 
@@ -76,21 +74,6 @@ namespace afterglowpy
         struct Mesh3 : MeshBase<Interval3>
         {
             using MeshBase<Interval3>::MeshBase;
-            // Mesh3();
-            // ~Mesh3();
-            
-            // void insert(Interval3 &interval);
-            // void extract(Interval3 &worst);
-            // double totalIntergral();
-            // double totalError();
-            // void write(char** buf);
-            // int  meshCheck(); 
-            // void heapifyUp();
-            // void heapifyDown();
-            // void meshWrite(char **buf);
-            // size_t totalSize;
-            // size_t N;
-            // std::vector<Interval3> heap;
         };
 
 
@@ -111,21 +94,6 @@ namespace afterglowpy
         struct Mesh5 : MeshBase<Interval5>
         {
             using MeshBase<Interval5>::MeshBase;
-            // Mesh5();
-            // ~Mesh5();
-            
-            // void insert(Interval5 &interval);
-            // void extract(Interval5 &worst);
-            // double totalIntergral();
-            // double totalError();
-            // void write(char** buf);
-            // int  meshCheck(); 
-            // void heapifyUp();
-            // void heapifyDown();
-            // void meshWrite(char **buf);
-            // size_t totalSize;
-            // size_t N;
-            // std::vector<Interval5> heap;
         };
 
 
@@ -150,21 +118,7 @@ namespace afterglowpy
         struct Mesh9 : MeshBase<Interval9>
         {
             using MeshBase<Interval9>::MeshBase;
-            // Mesh9();
-            // ~Mesh9();
-            
-            // void insert(Interval9 &interval);
-            // void extract(Interval9 &worst);
-            // double totalIntergral();
-            // double totalError();
-            // int  meshCheck(); 
-            // void heapifyUp();
-            // void heapifyDown();
-            // void meshWrite(char **buf);
             void intervalWrite(Interval9 &i, FILE *stream);
-            // size_t totalSize;
-            // size_t N;
-            // std::vector<Interval9> heap;
         };
     } // namespace mesh
     

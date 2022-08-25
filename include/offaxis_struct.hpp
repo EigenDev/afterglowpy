@@ -616,8 +616,14 @@ namespace afterglowpy
      * @param theta_h
      * @param pars
      */
-    void lc_tophat(std::vector<double> t, std::vector<double> nu, std::vector<double> F, int Nt,
-                double E_iso, double theta_h, fluxParams &pars);
+    void lc_tophat(
+        std::vector<double> &t, 
+        std::vector<double> &nu, 
+        std::vector<double> &F, 
+        int Nt,
+        double E_iso,
+        double theta_h, 
+        fluxParams &pars);
 
     /**
      * @brief Compute light curve for conical blast wave
@@ -631,8 +637,15 @@ namespace afterglowpy
      * @param theta_wing
      * @param pars
      */
-    void lc_cone(std::vector<double> t, std::vector<double> nu, std::vector<double> F, int Nt, double E_iso,
-                double theta_h, double theta_wing, fluxParams pars);
+    void lc_cone(
+        std::vector<double> &t, 
+        std::vector<double> &nu, 
+        std::vector<double> &F, 
+        int Nt, 
+        double E_iso,
+        double theta_core, 
+        double theta_wing, 
+        fluxParams &pars);
 
     /**
      * @brief Compute light curve for power law blast wave in core
@@ -650,11 +663,17 @@ namespace afterglowpy
      * @param res_cones
      * @param pars
      */
-    void lc_powerlawCore(std::vector<double> t, std::vector<double> nu, std::vector<double> F, int Nt,
-                        double E_iso_core, double theta_h_core,
-                        double theta_h_wing, double beta,
-                        std::vector<double> theta_c_arr, std::vector<double> E_iso_arr,
-                        int res_cones, fluxParams &pars);
+    void lc_powerlawCore(
+        std::vector<double> t, 
+        std::vector<double> nu, 
+        std::vector<double> F, int Nt,
+        double E_iso_core, 
+        double theta_h_core,
+        double theta_h_wing, 
+        double beta,
+        std::vector<double> theta_c_arr, 
+        std::vector<double> E_iso_arr,
+        int res_cones, fluxParams &pars);
 
     /**
      * @brief Compute light curve for power law blast wave
@@ -730,9 +749,14 @@ namespace afterglowpy
      * @param N
      * @param fp
      */
-    void calc_flux_density(int jet_type, int spec_type,
-                        std::vector<double> t, std::vector<double> nu, std::vector<double> Fnu, int N,
-                        fluxParams &fp);
+    void calc_flux_density(
+        int jet_type, 
+        int spec_type, 
+        std::vector<double> t,
+        std::vector<double> nu, 
+        std::vector<double> &Fnu, 
+        int N,
+        fluxParams &fp);
 
     /**
      * @brief Calculate the totqal intensity in a zone
