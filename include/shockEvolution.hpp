@@ -79,9 +79,9 @@ namespace afterglowpy
      * @param args 
      */
     void shockEvolveRK4(
-        std::vector<double> t,
-        std::vector<double> R, 
-        std::vector<double> u, 
+        std::vector<double> &t,
+        std::vector<double> &R, 
+        std::vector<double> &u, 
         int N, 
         double R0, 
         double u0, 
@@ -102,10 +102,10 @@ namespace afterglowpy
      * @param spread 
      */
     void shockEvolveSpreadRK4(
-        std::vector<double> t, 
-        std::vector<double> R, 
-        std::vector<double> u, 
-        std::vector<double> th, 
+        std::vector<double> &t, 
+        std::vector<double> &R, 
+        std::vector<double> &u, 
+        std::vector<double> &th, 
         int N, 
         double R0, 
         double u0, 

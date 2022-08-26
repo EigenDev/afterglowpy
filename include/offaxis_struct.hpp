@@ -666,7 +666,8 @@ namespace afterglowpy
     void lc_powerlawCore(
         std::vector<double> t, 
         std::vector<double> nu, 
-        std::vector<double> F, int Nt,
+        std::vector<double> F, 
+        int Nt,
         double E_iso_core, 
         double theta_h_core,
         double theta_h_wing, 

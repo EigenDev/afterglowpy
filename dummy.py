@@ -1,9 +1,10 @@
+#! /usr/bin/env python
 import jet_ext
 import numpy as np 
 import matplotlib.pyplot as plt 
-from enum import Enum 
+from enum import IntEnum 
 
-global_n = 100
+global_n = 300
 
 c = 2.99792458e10
 me = 9.1093897e-28
@@ -25,7 +26,7 @@ Hz2eV = 4.13566553853599e-15
 eV2Hz = 1.0/Hz2eV
 
 
-class Jet(Enum):
+class Jet(IntEnum):
     Cone           = -2,
     TopHat         = -1,
     Gaussian       = 0,
@@ -50,11 +51,11 @@ default_params = {
     "q": 0.0,
     "ts": 0.0, 
     "n_0": 1.0,
-    "p": 2.5,
+    "p": 2.2,
     "epsilon_E": 0.1,
     "epsilon_B": 0.01,
     "ksi_N": 1.0, 
-    "d_L": 1.0e27,
+    "d_L": 1.0e28,
 
     "latRes":  5,
     "tRes":  1000,
@@ -74,7 +75,7 @@ default_params = {
     
     "jetType": Jet.TopHat,
     "specType": 0,
-    "thetaObs": 0,
+    "thetaObs": 0.05,
     "E0": 1e53,
     "thetaCore": 0.1,
     "n0": 1,
@@ -83,8 +84,9 @@ default_params = {
     "xi_N": 1.0,
     "theta_wing": 0.1,
     "thetaWing": 0.1,
-    "mask": np.zeros(global_n),
-    "nmask": global_n,   
+    "mask": np.empty(global_n),
+    "nmask": 0,   
+    "z": 0.55,
 }
 
 def fluxDensity(t, nu, *args, **kwargs):
@@ -246,7 +248,6 @@ def fluxDensity(t, nu, *args, **kwargs):
 
     tz  = t / (1+z)
     nuz = nu * (1+z)
-
     # Default spreading method
     if 'spread' in argsDict:
         if argsDict['spread'] == True:
@@ -264,16 +265,16 @@ def fluxDensity(t, nu, *args, **kwargs):
     tAdd = argsDict.pop('tAdd') if 'tAdd' in argsDict else 0.0
     
     # timeA = time.time()
-    argsDict['ta'] = t.flat[0]
-    argsDict['tb'] = t.flat[-1]
-    Fnu = np.empty(tz.shape)
+    argsDict['ta'] = tz.flat[0]
+    argsDict['tb'] = tz.flat[-1]
+    Fnu            = np.empty_like(tz)
     Fnu.flat[:] = jet_ext.calc_flux_density_wrapper(
-        jet_type  = -1, 
-        spec_type = 1,
+        jet_type  = int(argsDict['jetType']), 
+        spec_type = argsDict['specType'],
         t         = tz.flatten(),
         nu        = nuz.flatten(),
         fnu       = Fnu.flatten(),
-        n         = global_n,
+        n         = tz.size,
         fp        = argsDict
     )
     print(Fnu)
@@ -593,7 +594,7 @@ def parseArgs(args, kwargs):
 
     return argsDict
 
-t    = np.linspace(0.1, 1000, global_n) * day2sec
+t    = np.geomspace(1.0e3, 1.0e7, 300)
 nu   = np.ones_like(t) * 1e9
 tday = t * sec2day
 a    = fluxDensity(t, nu, **default_params)

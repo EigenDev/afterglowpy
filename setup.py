@@ -4,6 +4,7 @@ from Cython.Build import cythonize
 import glob
 
 depends  = [f for f in glob.glob('include/*.hpp')]
+depends += [f for f in glob.glob('include/*.tpp')]
 jet_srcs = [f for f in glob.glob('src/jet/*.cpp')]
 shk_srcs = [f for f in glob.glob('src/shock/*.cpp')]
 extra_compiler_args = ['-std=c++17']

@@ -9,13 +9,9 @@ namespace afterglowpy
         template <typename T>
         void MeshBase<T>::insert(T &interval)
         {
-            while(N >= totalSize) {
-                T dummy;
-                totalSize *= 2;
-                heap.push_back(dummy);
-            }
+            heap.push_back(interval);
             N++;
-
+            
             //Restore ordering
             heapifyUp();
         }
@@ -23,7 +19,8 @@ namespace afterglowpy
         template <typename T>
         void MeshBase<T>::extract(T &worst)
         {
-            worst = heap[0];
+            // printf("changing i to: %.2e\n", heap[0].err);
+            worst   = heap[0];
             heap[0] = heap[N - 1];
             N--;
 
@@ -71,15 +68,17 @@ namespace afterglowpy
         {
             size_t c =  N - 1;
             size_t p = (c - 1) / 2;
-
             while(c != 0 && heap[p].err < heap[c].err)
             {
-                T tempP = heap[p];
-                heap[p] = heap[c];
-                heap[c] = tempP;
+                std::swap(heap[p], heap[c]);
                 c = p;
                 p = (c - 1) / 2;
             }
+            // for (int i =0; i < N; i++)
+            // {
+            //     printf("N: %d, val: %.2e\n", N, heap[i].err);
+            // }
+            // getchar();
         }
 
         template<typename T>
@@ -107,9 +106,7 @@ namespace afterglowpy
                     break;
 
                 // Otherwise, swap with the child.
-                T tempP = heap[p];
-                heap[p] = heap[c];
-                heap[c] = tempP;
+                std::swap(heap[p], heap[c]);
                 p = c;
                 c1 = 2*p + 1;
                 c2 = c1 + 1;

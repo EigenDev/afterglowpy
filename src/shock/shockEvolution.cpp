@@ -350,20 +350,20 @@ namespace afterglowpy
     {
         double *args = (double *)argv;
 
-        double Mej = args[1];
-        double rho0 = args[2];
-        double Einj = args[3];
-        double k = args[4];
-        double umin = args[5];
-        double L0 = args[6];
-        double q = args[7];
-        double ts = args[8];
-        double thC = args[9];
-        double th0 = args[10];
-        double thCg = args[11];
+        double Mej   = args[1];
+        double rho0  = args[2];
+        double Einj  = args[3];
+        double k     = args[4];
+        double umin  = args[5];
+        double L0    = args[6];
+        double q     = args[7];
+        double ts    = args[8];
+        double thC   = args[9];
+        double th0   = args[10];
+        double thCg  = args[11];
 
-        double R = x[0];
-        double u = x[1];
+        double R  = x[0];
+        double u  = x[1];
         double th = x[2];
 
         double g = sqrt(1 + u * u);
@@ -535,9 +535,9 @@ namespace afterglowpy
     }
 
     void shockEvolveRK4(
-        std::vector<double> t,
-        std::vector<double> R, 
-        std::vector<double> u, 
+        std::vector<double> &t,
+        std::vector<double> &R, 
+        std::vector<double> &u, 
         int N, 
         double R0, 
         double u0, 
@@ -577,10 +577,10 @@ namespace afterglowpy
         }
     }
     void shockEvolveSpreadRK4(
-        std::vector<double> t, 
-        std::vector<double> R, 
-        std::vector<double> u, 
-        std::vector<double> th, 
+        std::vector<double> &t, 
+        std::vector<double> &R, 
+        std::vector<double> &u, 
+        std::vector<double> &th, 
         int N, 
         double R0, 
         double u0, 
@@ -619,6 +619,8 @@ namespace afterglowpy
             for (j = 0; j < 3; j++)
                 x[j] = x0[j] + dt * (k1[j] + 2 * k2[j] + 2 * k3[j] + k4[j]) / 6.0;
 
+            // printf("xj[1]: %.2e, xj[2]: %.2e\n", x[0], x[1]);
+            // getchar();
             R[i + 1] = x[0];
             u[i + 1] = x[1];
             if (x[2] > 0.5 * M_PI)

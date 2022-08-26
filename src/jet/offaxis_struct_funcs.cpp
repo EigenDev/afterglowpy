@@ -7,7 +7,7 @@ namespace afterglowpy
 {
     double f_E_tophat(double theta, void *params)
     {
-        fluxParams pars = *(fluxParams *)params;
+        fluxParams &pars = *(fluxParams *)params;
         if (theta <= pars.theta_core)
             return pars.E_iso_core;
         return 0.0;
@@ -15,7 +15,7 @@ namespace afterglowpy
 
     double f_E_Gaussian(double theta, void *params)
     {
-        fluxParams pars = *(fluxParams *)params;
+        fluxParams &pars = *(fluxParams *)params;
         if (theta <= pars.theta_wing)
         {
             double x = theta / pars.theta_core;
@@ -26,7 +26,7 @@ namespace afterglowpy
 
     double f_E_GaussianRing(double theta, void *params)
     {
-        fluxParams pars = *(fluxParams *)params;
+        fluxParams &pars = *(fluxParams *)params;
         if (theta <= pars.theta_wing)
         {
             double x = theta / pars.theta_core;
@@ -38,7 +38,7 @@ namespace afterglowpy
 
     double f_E_powerlaw(double theta, void *params)
     {
-        fluxParams pars = *(fluxParams *)params;
+        fluxParams &pars = *(fluxParams *)params;
         if (theta <= pars.theta_wing)
         {
             double x = theta / pars.theta_core;
@@ -50,7 +50,7 @@ namespace afterglowpy
 
     double f_E_GaussianCore(double theta, void *params)
     {
-        fluxParams pars = *(fluxParams *)params;
+        fluxParams &pars = *(fluxParams *)params;
         if (theta <= pars.theta_wing)
         {
             double x = theta / pars.theta_core;
@@ -61,7 +61,7 @@ namespace afterglowpy
 
     double f_E_powerlawCore(double theta, void *params)
     {
-        fluxParams pars = *(fluxParams *)params;
+        fluxParams &pars = *(fluxParams *)params;
         if (theta <= pars.theta_wing)
         {
             double x = theta / pars.theta_core;
@@ -73,7 +73,7 @@ namespace afterglowpy
 
     double f_E_twocomponent(double theta, void *params)
     {
-        fluxParams pars = *(fluxParams *)params;
+        fluxParams &pars = *(fluxParams *)params;
 
         double th0 = 0.15;
         double th1 = 0.02;
@@ -98,7 +98,7 @@ namespace afterglowpy
 
     double f_E_exponential(double theta, void *params)
     {
-        fluxParams pars = *(fluxParams *)params;
+        fluxParams &pars = *(fluxParams *)params;
         if (theta <= pars.theta_wing)
         {
             double x = theta / pars.theta_core;
@@ -110,7 +110,7 @@ namespace afterglowpy
 
     double f_E_exponential2(double theta, void *params)
     {
-        fluxParams pars = *(fluxParams *)params;
+        fluxParams &pars = *(fluxParams *)params;
         if (theta <= pars.theta_wing)
         {
             double x = theta / pars.theta_core;
@@ -122,7 +122,7 @@ namespace afterglowpy
 
     double f_Etot_tophat(void *params)
     {
-        fluxParams pars = *(fluxParams *)params;
+        fluxParams &pars = *(fluxParams *)params;
         double E0 = pars.E_iso_core;
         double thetaC = pars.theta_core;
         return E0 * (1 - cos(thetaC));
@@ -130,7 +130,7 @@ namespace afterglowpy
 
     double f_Etot_Gaussian(void *params)
     {
-        fluxParams pars = *(fluxParams *)params;
+        fluxParams &pars = *(fluxParams *)params;
         double E0 = pars.E_iso_core;
         double thC = pars.theta_core;
         double thW = pars.theta_wing;
@@ -147,7 +147,7 @@ namespace afterglowpy
 
     double f_Etot_powerlaw(void *params)
     {
-        fluxParams pars = *(fluxParams *)params;
+        fluxParams &pars = *(fluxParams *)params;
         double E0 = pars.E_iso_core;
         double thC = pars.theta_core;
         double thW = pars.theta_wing;
@@ -206,7 +206,7 @@ namespace afterglowpy
                 a = i;
         }
 
-        return (int)a;
+        return static_cast<int>(a);
     }
 
     double interpolateLin(int a, int b, double x, std::vector<double> X,
@@ -235,15 +235,15 @@ namespace afterglowpy
 
     void make_mu_table(fluxParams &pars)
     {
-        auto t_obs = pars.t_obs;
-        auto t_table = pars.t_table;
-        auto R_table = pars.R_table;
-        auto mu_table = pars.mu_table;
-        auto table_entries = pars.table_entries;
-        auto t_table_inner = pars.t_table_inner;
-        auto R_table_inner = pars.R_table_inner;
-        auto mu_table_inner = pars.mu_table_inner;
-        auto table_entries_inner = pars.table_entries_inner;
+        auto &t_obs               = pars.t_obs;
+        auto &t_table             = pars.t_table;
+        auto &R_table             = pars.R_table;
+        auto &mu_table            = pars.mu_table;
+        auto &table_entries       = pars.table_entries;
+        auto &t_table_inner       = pars.t_table_inner;
+        auto &R_table_inner       = pars.R_table_inner;
+        auto &mu_table_inner      = pars.mu_table_inner;
+        auto &table_entries_inner = pars.table_entries_inner;
 
         int i;
         for (i = 0; i < table_entries; i++)
@@ -262,7 +262,6 @@ namespace afterglowpy
         double Rt0 = pars.Rt0;
         double Rt1 = pars.Rt1;
         int table_entries = static_cast<int>(tRes * std::log10(Rt1 / Rt0));
-
         pars.t_table_inner.resize(table_entries);
         pars.t_table.resize(table_entries);
         pars.R_table.resize(table_entries);
@@ -283,10 +282,11 @@ namespace afterglowpy
         pars.th_table.swap(pars.th_table_inner);
         pars.mu_table.swap(pars.mu_table_inner);
 
-        auto t_table  = pars.t_table;
-        auto R_table  = pars.R_table;
-        auto u_table  = pars.u_table;
-        auto th_table = pars.th_table;
+        // Variable aliasing
+        auto &t_table  = pars.t_table;
+        auto &R_table  = pars.R_table;
+        auto &u_table  = pars.u_table;
+        auto &th_table = pars.th_table;
 
         double fac = std::pow(Rt1 / Rt0, 1.0 / (table_entries - 1.0));
         t_table[0] = Rt0;
@@ -324,7 +324,6 @@ namespace afterglowpy
         args[1] = Mej_sph * fom;
         shockEvolveSpreadRK4(t_table, R_table, u_table, th_table, table_entries, R0,
                              u0, th0, args, spread);
-
         if (R_table[0] != R_table[0])
         {
             char msg[MSG_LEN];
@@ -562,7 +561,7 @@ namespace afterglowpy
    * It is good to know that 1 - cos(theta) = 2*sin(theta/2)^2
    */
 
-        fluxParams pars = *(fluxParams *)params;
+        fluxParams &pars = *(fluxParams *)params;
 
         pars.nevals += 1;
 
@@ -570,17 +569,16 @@ namespace afterglowpy
         // double cto = cos(pars.theta_obs_cur);
         // double sto = sin(pars.theta_obs_cur);
 
-        double act = 1 - aomct;
-        double a_theta = 2 * std::asin(std::sqrt(0.5 * aomct));
-        double ast = std::sqrt(aomct * (1 + act));
-        pars.theta = a_theta;
-        pars.ct = act;
-        pars.st = ast;
+        double act     = 1.0 - aomct;
+        double a_theta = 2.0 * std::asin(std::sqrt(0.5 * aomct));
+        double ast     = std::sqrt(aomct * (1 + act));
+        pars.theta     = a_theta;
+        pars.ct        = act;
+        pars.st        = ast;
 
         // double a_theta = acos(act);
         // double ast = sqrt((1.0 - act)*(1 + act));
         double mu = ast * (pars.cp) * (pars.sto) + act * (pars.cto);
-
         int ia = searchSorted(mu, pars.mu_table, pars.table_entries);
         int ib = ia + 1;
         double t_e = interpolateLin(ia, ib, mu, pars.mu_table, pars.t_table,
@@ -618,7 +616,10 @@ namespace afterglowpy
         u = interpolateLog(ia, ib, t_e, pars.t_table, pars.u_table,
                            pars.table_entries);
         us = shockVel(u);
-
+        // printf("aomct: %.2e\n", aomct);
+        // printf("ast: %.2e, cp: %.2e, sto: %.2e, act: %.2e, cto: %.2e\n", ast, (pars.cp), (pars.sto), act, (pars.cto));
+        // printf("ia: %d, ib: %d, nobs: %.2e, r: %.2e, mu: %.2e, u: %.2e\n", ia, ib, pars.nu_obs, R, mu, t_e, u, us);
+        // getchar();
         double dFnu =
             emissivity(pars.nu_obs, R, mu, t_e, u, us, pars.n_0, pars.p,
                        pars.epsilon_E, pars.epsilon_B, pars.ksi_N, pars.spec_type);
@@ -660,7 +661,8 @@ namespace afterglowpy
             set_error(pars, msg);
             return 0.0;
         }
-
+        // printf("cotheta: %.2e\n", dFnu);
+        // getchar();
         return fac * dFnu;
     }
 
@@ -676,8 +678,7 @@ namespace afterglowpy
    */
 
         double result;
-
-        fluxParams pars = *(fluxParams *)params;
+        fluxParams &pars = *(fluxParams *)params;
 
         // set up integration routine
 
@@ -743,15 +744,12 @@ namespace afterglowpy
             if (theta_0 != 0.0)
                 theta_0 = theta_1 - Dtheta;
         }
-
         if (theta_0 >= theta_1)
             return 0.0;
-
         // printf("# theta integration domain: %e - %e\n", theta_1 - Dtheta, theta_1);
         // fflush(stdout);
 
         // For a given phi, integrate over 1 - cos(theta)
-
         double sht0 = std::sin(0.5 * theta_0);
         double sht1 = std::sin(0.5 * theta_1);
         double omct0 = 2 * sht0 * sht0;
@@ -816,8 +814,6 @@ namespace afterglowpy
         break;
         case INTEGRAL_TYPE::INT_CADRE:
         {
-            std::cout << "cadre" << "\n";
-            std::cin.get();
             result = integrate::cadre_adapt(&costheta_integrand, omct0, omct1,
                                             pars.nmax_theta, pars.atol_theta,
                                             pars.rtol_theta, params, nullptr, nullptr,
@@ -848,31 +844,28 @@ namespace afterglowpy
         break;
         default:
         {
-            std::cout << "none of em" << "\n";
-            std::cin.get();
             char msg[MSG_LEN];
-            // snprintf(msg, MSG_LEN, "Unknown integrator %d!  Aborting.\n",
-            //          pars.int_type);
-            // set_error(pars, msg);
+            snprintf(msg, MSG_LEN, "Unknown integrator %d!  Aborting.\n",
+                     pars.int_type);
+            set_error(pars, msg);
             return 0.0;
         }
         break;
         }
-        std::cin.get();
-        // err_chk_dbl(pars);
+        err_chk_dbl(pars);
 
-        // if (std::isnan(result) || result < 0.0)
-        // {
-        //     char msg[MSG_LEN];
-        //     int c = 0;
-        //     c += snprintf(msg, MSG_LEN, "bad result in phi_integrand :%.3le\n", result);
+        if (std::isnan(result) || result < 0.0)
+        {
+            char msg[MSG_LEN];
+            int c = 0;
+            c += snprintf(msg, MSG_LEN, "bad result in phi_integrand :%.3le\n", result);
 
-        //     c += snprintf(msg + c, MSG_LEN - c,
-        //                   "   t_obs=%.3le theta_lo=%.3lf theta_hi=%.3lf phi=%.3lf\n",
-        //                   pars.t_obs, theta_0, theta_1, pars.phi);
-        //     set_error(pars, msg);
-        //     return 0.0;
-        // }
+            c += snprintf(msg + c, MSG_LEN - c,
+                          "   t_obs=%.3le theta_lo=%.3lf theta_hi=%.3lf phi=%.3lf\n",
+                          pars.t_obs, theta_0, theta_1, pars.phi);
+            set_error(pars, msg);
+            return 0.0;
+        }
 
         // printf("   a_phi: %.6lf (%.6le)\n", a_phi, result);
 
@@ -884,33 +877,32 @@ namespace afterglowpy
                          int N)
     {
         /*
-   *
-   * Return the (outer) edge of the jet section for a particular obs.
-   *
-   * phi: double
-   *      phi-coordinate of jet along which to search
-   * cto: double
-   *      cos(theta_obs) cosine of observer angle
-   * sto: double
-   *      sin(theta_obs) sine of observer angle
-   * theta0: double
-   *
-   * a_mu: double array
-   *      time-ordered array of mu values for this observation.
-   *      mu = c * (t_em - t_obs) / R(t_em)
-   *         = cos(th_obs)*cos(theta) + sin(theta_obs)*sin(theta)*cos(phi)
-   * a_thj: double array
-   *      time ordered array of jet-edge values.
-   */
+        *
+        * Return the (outer) edge of the jet section for a particular obs.
+        *
+        * phi: double
+        *      phi-coordinate of jet along which to search
+        * cto: double
+        *      cos(theta_obs) cosine of observer angle
+        * sto: double
+        *      sin(theta_obs) sine of observer angle
+        * theta0: double
+        *
+        * a_mu: double array
+        *      time-ordered array of mu values for this observation.
+        *      mu = c * (t_em - t_obs) / R(t_em)
+        *         = cos(th_obs)*cos(theta) + sin(theta_obs)*sin(theta)*cos(phi)
+        * a_thj: double array
+        *      time ordered array of jet-edge values.
+        */
 
-        double cp = cos(phi);
-        double mu = cos(theta0) * cto + sin(theta0) * sto * cp;
+        double cp = std::cos(phi);
+        double mu = std::cos(theta0) * cto + std::sin(theta0) * sto * cp;
 
         int ia = searchSorted(mu, a_mu, N);
-
         if (a_thj[ia] <= theta0 && theta0 <= a_thj[ia + 1])
             return theta0;
-
+       
         double tha, thb;
         if (theta0 < a_thj[ia])
         {
@@ -924,7 +916,6 @@ namespace afterglowpy
             tha = 0.0;
             thb = theta0;
         }
-
         int i = 0;
         while (thb - tha > 1.0e-5 && i < 100)
         {
@@ -953,7 +944,6 @@ namespace afterglowpy
 
         // at this stage t_obs is known, so mu_table can be made
         make_mu_table(pars);
-
         double d_L = pars.d_L;
 
         double Fcoeff = cgs2mJy / (4 * M_PI * d_L * d_L);
@@ -1136,6 +1126,11 @@ namespace afterglowpy
             F[i] = flux_cone(t[i], nu[i], -1, -1, 0.0, theta_h, 0.0, pars);
             err_chk_void(pars);
         }
+        // for (auto &&i : F)
+        // {
+        //     std::cout << i << "\n";
+        // }
+        
     }
 
     void lc_struct(std::vector<double> &t, std::vector<double> &nu,
@@ -2308,12 +2303,12 @@ namespace afterglowpy
                         double theta_obs_cur, double current_theta_cone_hi,
                         double current_theta_cone_low)
     {
-        pars.t_obs = t_obs;
-        pars.nu_obs = nu_obs;
-        pars.theta_obs_cur = theta_obs_cur;
-        pars.cto = cos(theta_obs_cur);
-        pars.sto = sin(theta_obs_cur);
-        pars.current_theta_cone_hi = current_theta_cone_hi;
+        pars.t_obs                  = t_obs;
+        pars.nu_obs                 = nu_obs;
+        pars.theta_obs_cur          = theta_obs_cur;
+        pars.cto                    = std::cos(theta_obs_cur);
+        pars.sto                    = std::sin(theta_obs_cur);
+        pars.current_theta_cone_hi  = current_theta_cone_hi;
         pars.current_theta_cone_low = current_theta_cone_low;
     }
 

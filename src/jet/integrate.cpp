@@ -904,9 +904,9 @@ namespace afterglowpy
                 double T0 = 2*h * (fa + fb);
                 double T1 = 0.5*T0 + 2*h*fm;
                 double T2 = 0.5*T1 + h*(fl + fr);
-
+                // printf("a: %.2e, b: %.2e, fa: %.2e, fb: %.2e, h: %.2e\n", i.a, i.b, fa, fb,  h);
+                // getchar();
                 double R0 = (T1 - T0) / (T2 - T1);
-
                 if(R0 > 4-scaleTol && R0 < 4+scaleTol)
                 {
                     // We might be in the asymptotic regime!  
@@ -964,7 +964,6 @@ namespace afterglowpy
                         i.I = i.flr;
                         i.err = std::abs((i.fl - R22) / 63.0);
                         i.refinement = 4;
-
                         return count;
                     }
                     else
@@ -981,12 +980,14 @@ namespace afterglowpy
                 {
                     // We're in a strange regime.  Proceed with caution and
                     // just use vanilla Trapezoid rule with over-estimated error.
-                    
                     double err10 = std::abs(T1-T0);
                     double err21 = std::abs(T2-T1);
                     double err = err10 > err21 ? err10 : err21;
                     i.err = err;
                     i.I = T2;//  + errt;
+
+                    // printf("calculated err: %.2e\, T0: %2.e, T1: %.2e, T2: %.2e\n", i.err, T0, T1, T2);
+                    // getchar();
                     
                     return count;
                 }
@@ -1006,7 +1007,6 @@ namespace afterglowpy
 
                     return count;
                 }
-
                 return count;
             }
 
@@ -1135,7 +1135,6 @@ namespace afterglowpy
             i.I = (262144 * i.fb - Rnm) / 262143.0;
             i.err = std::abs((i.fb - Rnm) / 262143.0);
             i.refinement += 1;
-
             return count;
         }
 
@@ -1621,10 +1620,17 @@ namespace afterglowpy
                 m.intervalWrite(i, stdout);
             }
 
+            // static int ccount = 0;
+            // ccount++;
+            // if (err != 0) {
+            //     printf("call count: %d, err: %.2e\n", ccount, err);
+            //     getchar();
+            // }
+            // printf("terms before loop, i: %.2e, atol: %.2e, rtol: %.2e, I: %.2e\n", i.err, atol, rtol, I);;
             while(n < Nmax && err > atol + rtol*std::abs(I))
             {
                 m.extract(i);
-
+                // printf("mesh at 0: %.2e\n", m.heap[0].err);
                 if(verbose && num_iterations > 0)
                     m.intervalWrite(i, stdout);
 
@@ -1641,7 +1647,6 @@ namespace afterglowpy
                         return 0.0;
                     }
                     m.insert(i);
-
                     err += i.err - olderr;
                     I += i.I - oldI;
 
@@ -1657,13 +1662,15 @@ namespace afterglowpy
                     {
                         return 0.0;
                     }
+                    // printf("mesh at 0: %.2e\n", m.heap[0].err);
                     m.insert(i1);
                     m.insert(i2);
+                    // printf("mesh at 0: %.2e\n", m.heap[0].err);
                     num_intervals++;
-                    
+                    // printf("i1 err: %.2e, i2: %.2e, i0: %.2e\n", i1.err, i2.err, i.err);
                     err += i1.err + i2.err - i.err;
-                    I += i1.I + i2.I - i.I;
-                    
+                    I   += i1.I + i2.I - i.I;
+
                     newI = i1.I + i2.I;
                     newErr = i1.err + i2.err;
                 }
@@ -1684,9 +1691,12 @@ namespace afterglowpy
                 }
                 num_iterations++;
             }
-
-            // std::cout << m.N << ", " << Nmax << ", " << err << "\n";
-            // std::cin.get();
+            // static int ccount = 0;
+            // ccount++;
+            // if (err != 0) {
+            //     printf("call count: %d, err: %.2e\n", ccount, err);
+            //     getchar();
+            // }
             I = m.totalIntergral();
 
             if(Neval)
@@ -1701,7 +1711,7 @@ namespace afterglowpy
             if(mout)
                 *mout = m;
             
-            std::cout << I << ", " << Nmax << "\n";
+            // std::cout << I << ", " << Nmax << "\n";
             return I;
         }
 
