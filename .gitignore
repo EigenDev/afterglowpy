@@ -2,6 +2,10 @@
 *.swp
 *.so
 *.pyc
+afterglowpy/__pycache__/
+afterglowpy.egg-info/
+.vscode/*
+.github/*
 build/
 dist/
 *egg-info*
