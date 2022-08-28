@@ -1,11 +1,8 @@
-from . import cocoon
-from ..src import jet
+import afterglow_ext
 import numpy as np
-import warnings
-
+from .detail import * 
 
 def fluxDensity(t, nu, *args, **kwargs):
-    
     """
     Compute the flux density F_nu of a GRB afterglow.
 
@@ -29,7 +26,7 @@ def fluxDensity(t, nu, *args, **kwargs):
 
     To call a spherical refreshed shock model with positional arguments::
 
-        Fnu = fluxDensity(t, nu, jet.Spherical, specType, uMax, uMin, Er, k,
+        Fnu = fluxDensity(t, nu, Jet.Spherical, specType, uMax, uMin, Er, k,
                           MFast_solar, L0, q, ts, n0, p, epsilon_e, epsilon_B,
                           xi_N, d_L, **Z)
 
@@ -41,10 +38,10 @@ def fluxDensity(t, nu, *args, **kwargs):
     nu : array_like or scalar
         Frequency of flux in observer frame, measured in Hz, same size as t.
     jetType : int
-        Code for type of jet. Model codes are available in ``afterglowpy.jet``
-        and include: ``jet.TopHat``, ``jet.Cone``, ``jet.Gaussian``,
-        ``jet.PowerLaw``, ``jet.GaussianCore``, ``jet.PowerLawCore``,
-        ``jet.Spherical`, and ``jet.Ring''`.
+        Code for type of Jet. Model codes are available in ``afterglowpy.jet``
+        and include: ``Jet.TopHat``, ``Jet.Cone``, ``Jet.Gaussian``,
+        ``Jet.PowerLaw``, ``Jet.GaussianCore``, ``Jet.PowerLawCore``,
+        ``Jet.Spherical`, and ``Jet.Ring''`.
     specType : int
         Code for type of spectrum.  Options are: 0 broken power law
         (Ryan+ 2020), 1 broken power law w/ inverse Compton cooling. Default: 0
@@ -57,10 +54,10 @@ def fluxDensity(t, nu, *args, **kwargs):
         Half opening angle of jet core in radians. Jet models only.
     thetaWing: float
         Outer truncation angle of the jet in radians. Ignored by
-        ``jet.TopHat``, jet models only.
+        ``Jet.TopHat``, jet models only.
     b: float
         Power law index of jet angular energy distribution. Only used by
-        ``jet.PowerLaw`` and ``jet.PowerLawCore``.
+        ``Jet.PowerLaw`` and ``Jet.PowerLawCore``.
     n0 : float
         Number density of protons in circumburst medium in cm^{-3}.
     p : float
@@ -118,7 +115,7 @@ def fluxDensity(t, nu, *args, **kwargs):
         thetaCore-sized interval. Defaults to 5.
     intType : int, optional
         Integration scheme to use when computing flux. Defaults to
-        ``jet.Cadre``. Changing this may result in longer run times or larger
+        ``Jet.Cadre``. Changing this may result in longer run times or larger
         than expected numerical errors.
     rtolStruct : float, optional
         Overall relative tolerance of flux integration for structured jets.
@@ -149,12 +146,16 @@ def fluxDensity(t, nu, *args, **kwargs):
     """
 
     argsDict = parseArgs(args, kwargs)
+    # Set the default params if not given by user
+    for key in default_params.keys():
+        if key not in argsDict:
+            argsDict[key] = default_params[key]
 
     t, nu = checkTNu(t, nu)
 
     jetType = argsDict['jetType']
-
-    if jetType == jet.Spherical:
+    checkJetArgs(**argsDict)
+    if jetType == Jet.Spherical:
         checkCocoonArgs(**argsDict)
     else:
         checkJetArgs(**argsDict)
@@ -162,9 +163,8 @@ def fluxDensity(t, nu, *args, **kwargs):
     # arguments are good, full steam ahead!
     z = argsDict.pop('z') if 'z' in argsDict else 0.0
 
-    tz = t / (1+z)
+    tz  = t / (1+z)
     nuz = nu * (1+z)
-
     # Default spreading method
     if 'spread' in argsDict:
         if argsDict['spread'] == True:
@@ -182,19 +182,31 @@ def fluxDensity(t, nu, *args, **kwargs):
     tAdd = argsDict.pop('tAdd') if 'tAdd' in argsDict else 0.0
     
     # timeA = time.time()
-
-    Fnu = np.empty(tz.shape)
-
-    if argsDict['jetType'] == jet.Spherical:
-        Fnu.flat[:] = cocoon.fluxDensity(tz.flat, nuz.flat, **argsDict)
+    argsDict['ta'] = tz.flat[0]
+    argsDict['tb'] = tz.flat[-1]
+    Fnu            = np.empty_like(tz)
+    
+    if argsDict['jetType'] == Jet.Spherical:
+        Fnu.flat[:] = afterglow_ext.spherical_flux_density_wrapper(
+            tz.flatten(), 
+            nuz.flatten(), 
+            **argsDict)
     else:
-        Fnu.flat[:] = jet.fluxDensity(tz.flat, nuz.flat, **argsDict)
+        Fnu.flat[:] = afterglow_ext.jet_flux_density_wrapper(
+            jet_type  = int(argsDict['jetType']), 
+            spec_type = argsDict['specType'],
+            t         = tz.flatten(),
+            nu        = nuz.flatten(),
+            fnu       = Fnu.flatten(),
+            n         = tz.size,
+            fp        = argsDict
+        )
     # timeB = time.time()
     # print("Eval took: {0:f} s".format(timeB - timeA))
 
     
     # Adding background luminosities.
-    L_to_flux = cocoon.cgs2mJy / (4*np.pi * argsDict['d_L']**2)
+    L_to_flux = cgs2mJy / ( 4 * np.pi * argsDict['d_L']**2)
 
 
     if LR > 0.0:
@@ -215,7 +227,6 @@ def fluxDensity(t, nu, *args, **kwargs):
     Fnu *= 1+z
 
     return Fnu
-
 
 def intensity(theta, phi, t, nu, *args, **kwargs):
     """
@@ -249,7 +260,7 @@ def intensity(theta, phi, t, nu, *args, **kwargs):
                           epsilon_B, xi_N, d_L, **Z)
 
     This is currently only implemented for jetted models. Do not use with
-    ``jetType=jet.Spherical``.
+    ``jetType=Jet.Spherical``.
 
 
     Parameters 
@@ -265,10 +276,10 @@ def intensity(theta, phi, t, nu, *args, **kwargs):
     nu : array_like or scalar
         Frequency of flux in observer frame, measured in Hz, same size as t.
     jetType : int
-        Code for type of jet. Model codes are available in ``afterglowpy.jet``
-        and include: ``jet.TopHat``, ``jet.Cone``, ``jet.Gaussian``,
-        ``jet.PowerLaw``, ``jet.GaussianCore``, ``jet.PowerLawCore``, and
-        ``jet.Spherical``.
+        Code for type of Jet. Model codes are available in ``afterglowpy.jet``
+        and include: ``Jet.TopHat``, ``Jet.Cone``, ``Jet.Gaussian``,
+        ``Jet.PowerLaw``, ``Jet.GaussianCore``, ``Jet.PowerLawCore``, and
+        ``Jet.Spherical``.
     specType : int
         Code for type of spectrum.  Options are: 0 broken power law
         (Ryan+ 2020), 1 broken power law w/ inverse Compton cooling. Default: 0
@@ -281,10 +292,10 @@ def intensity(theta, phi, t, nu, *args, **kwargs):
         Half opening angle of jet core in radians. Jet models only.
     thetaWing: float
         Outer truncation angle of the jet in radians. Ignored by
-        ``jet.TopHat``, jet models only.
+        ``Jet.TopHat``, jet models only.
     b: float
         Power law index of jet angular energy distribution. Only used by
-        ``jet.PowerLaw`` and ``jet.PowerLawCore``.
+        ``Jet.PowerLaw`` and ``Jet.PowerLawCore``.
     n0 : float
         Number density of protons in circumburst medium in cm^{-3}.
     p : float
@@ -352,15 +363,19 @@ def intensity(theta, phi, t, nu, *args, **kwargs):
         If theta, phi, t, nu are the wrong shape or arguments take illegal
         values.
     """
-    
-    argsDict = parseArgs(args, kwargs)
+    # Set the default params if not given by user
+    for key in default_params.keys():
+        if key not in argsDict:
+            argsDict[key] = default_params[key]
 
+    argsDict = parseArgs(args, kwargs)  
+            
     # Check Arguments, will raise ValueError if args are bad
     theta, phi, t, nu = checkThetaPhiTNu(theta, phi, t, nu)
 
     jetType = argsDict['jetType']
 
-    if jetType == jet.Spherical:
+    if jetType == Jet.Spherical:
         checkCocoonArgs(**argsDict)
     else:
         checkJetArgs(**argsDict)
@@ -386,10 +401,22 @@ def intensity(theta, phi, t, nu, *args, **kwargs):
     LX = argsDict.pop('LX') if 'LX' in argsDict else 0.0
     tAdd = argsDict.pop('tAdd') if 'tAdd' in argsDict else 0.0
 
+    argsDict['ta'] = tz.flat[0]
+    argsDict['tb'] = tz.flat[-1]
+    
     Inu = np.empty(theta.shape)
-    Inu.flat[:] = jet.intensity(theta.flat, phi.flat, tz.flat, nuz.flat,
-                                **argsDict)
-
+    Inu.flat[:] = afterglow_ext.intensity_wrapper(
+        jet_type  = int(argsDict['jetType']), 
+        spec_type = argsDict['specType'],
+        t         = tz.flatten(),
+        nu        = nuz.flatten(),
+        theta     = theta.flatten(),
+        phi       = phi.flatten(),
+        Inu       = Inu.flatten(),
+        n         = tz.size,
+        fp        = argsDict
+    )
+    
     # K-correct the intensity
     # I'm only using the flux correction here, which leaves the angular
     # part of the intensity uncorrected.  Best be careful.
@@ -397,7 +424,6 @@ def intensity(theta, phi, t, nu, *args, **kwargs):
     Inu *= 1+z
 
     return Inu
-
 
 def checkTNu(t, nu):
     # Make sure t and nu are array_like or castable to an array.
@@ -477,11 +503,12 @@ def checkThetaPhiTNu(theta, phi, t, nu):
 
 
 def checkJetArgs(**argsDict):
-
     for _, x in argsDict.items():
-        if not np.isfinite(x):
-            raise ValueError("All parameters must be finite")
-
+        try:
+            if not np.isfinite(x):
+                raise ValueError("All parameters must be finite")
+        except TypeError:
+            pass
 
     jetType = argsDict['jetType']
     specType = argsDict['specType']
@@ -501,9 +528,9 @@ def checkJetArgs(**argsDict):
         raise ValueError("theta_obs must be in [0.0, pi/2]")
     if E0 <= 0.0:
         raise ValueError("E0 must be positive")
-    if jetType != jet.Cone and (theta_c <= 0.0 or theta_c > 0.5*np.pi):
+    if jetType != Jet.Cone and (theta_c <= 0.0 or theta_c > 0.5*np.pi):
         raise ValueError("theta_c must be in (0.0, pi/2]")
-    if jetType == jet.Cone and (theta_c < 0.0 or theta_c > 0.5*np.pi):
+    if jetType == Jet.Cone and (theta_c < 0.0 or theta_c > 0.5*np.pi):
         raise ValueError("theta_c must be in [0.0, pi/2]")
     if n0 <= 0.0:
         raise ValueError("n0 must be positive")
@@ -522,7 +549,7 @@ def checkJetArgs(**argsDict):
 
     # Bounds on optional parameters
 
-    if jetType != jet.TopHat:
+    if jetType != Jet.TopHat:
         if 'thetaWing' not in argsDict:
             raise KeyError('This jet type requires thetaWing')
         else:
@@ -530,7 +557,7 @@ def checkJetArgs(**argsDict):
             if (theta_w <= 0.0 or theta_w > 0.5*np.pi):
                 raise ValueError("thetaWing must be in (0.0, pi/2]")
 
-    if jetType == jet.PowerLaw or jetType == jet.PowerLawCore:
+    if jetType == Jet.PowerLaw or jetType == Jet.PowerLawCore:
         if 'b' not in argsDict:
             raise KeyError('This jet type requires b')
         else:
@@ -567,7 +594,7 @@ def checkJetArgs(**argsDict):
             raise ValueError("z must be non-negative")
 
     # Model Specific bounds
-    if jetType == jet.Cone and argsDict['thetaCore'] > argsDict['thetaWing']:
+    if jetType == Jet.Cone and argsDict['thetaCore'] > argsDict['thetaWing']:
         raise ValueError("thetaWing must be larger than thetaCore"
                          "for cone model")
 
@@ -577,8 +604,12 @@ def checkJetArgs(**argsDict):
 def checkCocoonArgs(**argsDict):
 
     for _, x in argsDict.items():
-        if not np.isfinite(x):
-            raise ValueError("All parameters must be finite")
+        for _, x in argsDict.items():
+            try:
+                if not np.isfinite(x):
+                    raise ValueError("All parameters must be finite")
+            except TypeError:
+                pass
 
     specType = argsDict['specType']
 
@@ -676,14 +707,9 @@ def parseArgs(args, kwargs):
 
     jetType = args[0]
 
-    if jetType == jet.Spherical:
-        argsDict.update(zip(sphKeys, args))
-    else:
-        argsDict.update(zip(jetKeys, args))
+    # if jetType == Jet.Spherical:
+    #     argsDict.update(zip(sphKeys, args))
+    # else:
+    #     argsDict.update(zip(jetKeys, args))
 
     return argsDict
-
-
-
-
-

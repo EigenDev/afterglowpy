@@ -9,7 +9,8 @@ namespace afterglowpy
         template <typename T>
         void MeshBase<T>::insert(T &interval)
         {
-            heap.push_back(interval);
+            heap[N] = interval;
+            // heap.push_back(interval);
             N++;
             
             //Restore ordering

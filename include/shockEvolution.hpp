@@ -1,6 +1,6 @@
 #ifndef SHOCKEVOLUTION_HPP
 #define SHOCKEVOLUTION_HPP
-
+#include <vector>
 static const double T0_inj = 1.0e3;
 
 namespace afterglowpy

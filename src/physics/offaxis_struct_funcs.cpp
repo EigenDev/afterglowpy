@@ -166,7 +166,7 @@ namespace afterglowpy
     ///////////////////////////////////////////////////////////////////////////////
 
     double check_t_e(double t_e, double mu, double t_obs,
-                     std::vector<double> mu_table, int N)
+                     std::vector<double> &mu_table, int N)
     {
         if (mu > mu_table[N - 1])
         {
@@ -186,7 +186,7 @@ namespace afterglowpy
         return t_e;
     }
 
-    int searchSorted(double x, std::vector<double> arr, int N)
+    int searchSorted(double x, std::vector<double> &arr, int N)
     {
         if (x <= arr[0])
             return 0;
@@ -209,8 +209,8 @@ namespace afterglowpy
         return static_cast<int>(a);
     }
 
-    double interpolateLin(int a, int b, double x, std::vector<double> X,
-                          std::vector<double> Y, int N)
+    double interpolateLin(int a, int b, double x, std::vector<double> &X,
+                          std::vector<double> &Y, int N)
     {
         double xa = X[a];
         double xb = X[b];
@@ -220,8 +220,8 @@ namespace afterglowpy
         return ya + (yb - ya) * (x - xa) / (xb - xa);
     }
 
-    double interpolateLog(int a, int b, double x, std::vector<double> X,
-                          std::vector<double> Y, int N)
+    double interpolateLog(int a, int b, double x, std::vector<double> &X,
+                          std::vector<double> &Y, int N)
     {
         double xa = X[a];
         double xb = X[b];
@@ -553,14 +553,13 @@ namespace afterglowpy
     double costheta_integrand(double aomct, void *params) // inner integral
     {
         /*
-   * This is the integrand for the inner integral, over theta.
-   * The integral is actually performed over 1-cos(theta),
-   * which eliminates the geometrical sin(theta) factor the standard volume
-   * element and retains numerical accuracy near theta=0.
-   *
-   * It is good to know that 1 - cos(theta) = 2*sin(theta/2)^2
-   */
-
+        * This is the integrand for the inner integral, over theta.
+        * The integral is actually performed over 1-cos(theta),
+        * which eliminates the geometrical sin(theta) factor the standard volume
+        * element and retains numerical accuracy near theta=0.
+        *
+        * It is good to know that 1 - cos(theta) = 2*sin(theta/2)^2
+        */
         fluxParams &pars = *(fluxParams *)params;
 
         pars.nevals += 1;
@@ -623,7 +622,7 @@ namespace afterglowpy
         double dFnu =
             emissivity(pars.nu_obs, R, mu, t_e, u, us, pars.n_0, pars.p,
                        pars.epsilon_E, pars.epsilon_B, pars.ksi_N, pars.spec_type);
-
+ 
         if (dFnu != dFnu || dFnu < 0.0)
         {
             char msg[MSG_LEN];
@@ -661,8 +660,6 @@ namespace afterglowpy
             set_error(pars, msg);
             return 0.0;
         }
-        // printf("cotheta: %.2e\n", dFnu);
-        // getchar();
         return fac * dFnu;
     }
 
@@ -671,11 +668,11 @@ namespace afterglowpy
     double phi_integrand(double a_phi, void *params) // outer integral
     {
         /*
-   * This is the integrand for the (outer) phi integral. This is the
-   * inner integral over ~theta.  For stability and smoothness, the
-   * integral is performed over 1-cos(theta) instead of over theta
-   * itself.  It is good to know that 1 - cos(theta) = 2 * sin(theta/2)^2
-   */
+        * This is the integrand for the (outer) phi integral. This is the
+        * inner integral over ~theta.  For stability and smoothness, the
+        * integral is performed over 1-cos(theta) instead of over theta
+        * itself.  It is good to know that 1 - cos(theta) = 2 * sin(theta/2)^2
+        */
 
         double result;
         fluxParams &pars = *(fluxParams *)params;
@@ -755,18 +752,17 @@ namespace afterglowpy
         double omct0 = 2 * sht0 * sht0;
         double omct1 = 2 * sht1 * sht1;
 
-
         switch (pars.int_type)
         {
         case INTEGRAL_TYPE::INT_TRAP_FIXED:
         {
-            result = integrate::trap(&costheta_integrand, omct0, omct1, pars.nmax_theta,
+            result = integrate::trap(costheta_integrand, omct0, omct1, pars.nmax_theta,
                                      params, check_error);
         }
         break;
         case INTEGRAL_TYPE::INT_TRAP_ADAPT:
         {
-            result = integrate::trap_adapt(&costheta_integrand, omct0, omct1,
+            result = integrate::trap_adapt(costheta_integrand, omct0, omct1,
                                            pars.nmax_theta, pars.atol_theta,
                                            pars.rtol_theta, params, nullptr, nullptr,
                                            nullptr, 0, check_error, nullptr, nullptr);
@@ -774,13 +770,13 @@ namespace afterglowpy
         break;
         case INTEGRAL_TYPE::INT_SIMP_FIXED:
         {
-            result = integrate::simp(&costheta_integrand, omct0, omct1, pars.nmax_theta,
+            result = integrate::simp(costheta_integrand, omct0, omct1, pars.nmax_theta,
                                      params, check_error);
         }
         break;
         case INTEGRAL_TYPE::INT_SIMP_ADAPT:
         {
-            result = integrate::simp_adapt(&costheta_integrand, omct0, omct1,
+            result = integrate::simp_adapt(costheta_integrand, omct0, omct1,
                                            pars.nmax_theta, pars.atol_theta,
                                            pars.rtol_theta, params, nullptr, nullptr,
                                            nullptr, 0, check_error, nullptr, nullptr);
@@ -791,14 +787,14 @@ namespace afterglowpy
             int Neval = 0;
             double err = 0;
 
-            result = integrate::romb(&costheta_integrand, omct0, omct1, pars.nmax_theta,
+            result = integrate::romb(costheta_integrand, omct0, omct1, pars.nmax_theta,
                                      pars.atol_theta, pars.rtol_theta, params, &Neval,
                                      &err, 0, check_error, nullptr, nullptr);
         }
         break;
         case INTEGRAL_TYPE::INT_TRAP_NL:
         {
-            result = integrate::trapNL_adapt(&costheta_integrand, omct0, omct1,
+            result = integrate::trapNL_adapt(costheta_integrand, omct0, omct1,
                                              pars.nmax_theta, pars.atol_theta,
                                              pars.rtol_theta, params, nullptr, nullptr,
                                              nullptr, 0, check_error, nullptr, nullptr);
@@ -806,7 +802,7 @@ namespace afterglowpy
         break;
         case INTEGRAL_TYPE::INT_HYBRID:
         {
-            result = integrate::hybrid_adapt(&costheta_integrand, omct0, omct1,
+            result = integrate::hybrid_adapt(costheta_integrand, omct0, omct1,
                                              pars.nmax_theta, pars.atol_theta,
                                              pars.rtol_theta, params, nullptr, nullptr,
                                              0, check_error, nullptr, nullptr);
@@ -814,7 +810,7 @@ namespace afterglowpy
         break;
         case INTEGRAL_TYPE::INT_CADRE:
         {
-            result = integrate::cadre_adapt(&costheta_integrand, omct0, omct1,
+            result = integrate::cadre_adapt(costheta_integrand, omct0, omct1,
                                             pars.nmax_theta, pars.atol_theta,
                                             pars.rtol_theta, params, nullptr, nullptr,
                                             0, check_error, nullptr, nullptr);
@@ -823,7 +819,7 @@ namespace afterglowpy
         case INTEGRAL_TYPE::INT_GK49_ADAPT:
         {
             result = integrate::gk49_adapt(
-                &costheta_integrand, omct0, omct1, pars.nmax_theta, pars.atol_theta,
+                costheta_integrand, omct0, omct1, pars.nmax_theta, pars.atol_theta,
                 pars.rtol_theta, params, nullptr, nullptr, 0, check_error);
         
         }
@@ -831,14 +827,14 @@ namespace afterglowpy
         case INTEGRAL_TYPE::INT_GK715_ADAPT:
         {
             result = integrate::gk715_adapt(
-                &costheta_integrand, omct0, omct1, pars.nmax_theta, pars.atol_theta,
+                costheta_integrand, omct0, omct1, pars.nmax_theta, pars.atol_theta,
                 pars.rtol_theta, params, nullptr, nullptr, 0, check_error);
         }
         break;
         case INTEGRAL_TYPE::INT_GK1021_ADAPT:
         {
             result = integrate::gk1021_adapt(
-                &costheta_integrand, omct0, omct1, pars.nmax_theta, pars.atol_theta,
+                costheta_integrand, omct0, omct1, pars.nmax_theta, pars.atol_theta,
                 pars.rtol_theta, params, nullptr, nullptr, 0, check_error);
         }
         break;
@@ -873,7 +869,7 @@ namespace afterglowpy
     }
 
     double find_jet_edge(double phi, double cto, double sto, double theta0,
-                         std::vector<double> a_mu, std::vector<double> a_thj,
+                         std::vector<double> &a_mu, std::vector<double> &a_thj,
                          int N)
     {
         /*
@@ -945,7 +941,6 @@ namespace afterglowpy
         // at this stage t_obs is known, so mu_table can be made
         make_mu_table(pars);
         double d_L = pars.d_L;
-
         double Fcoeff = cgs2mJy / (4 * M_PI * d_L * d_L);
 
         // pars.atol_theta = 0.0;
@@ -956,20 +951,19 @@ namespace afterglowpy
         //  atol/(2*Fcoeff), we only need the to know the integrand (the integral
         //  over theta) to a tolerance of atol / (2*Fcoeff)
         pars.atol_theta = atol / (2 * Fcoeff * M_PI);
-
         switch (pars.int_type)
         {
         case INTEGRAL_TYPE::INT_TRAP_FIXED:
         {
             result = 2 * Fcoeff *
-                     integrate::trap(&phi_integrand, phi_0, phi_1, pars.nmax_phi, &pars,
+                     integrate::trap(phi_integrand, phi_0, phi_1, pars.nmax_phi, &pars,
                                      check_error);
         }
         break;
         case INTEGRAL_TYPE::INT_TRAP_ADAPT:
         {
             result = 2 * Fcoeff *
-                     integrate::trap_adapt(&phi_integrand, phi_0, phi_1, pars.nmax_phi,
+                     integrate::trap_adapt(phi_integrand, phi_0, phi_1, pars.nmax_phi,
                                            atol / (2 * Fcoeff), pars.rtol_phi, &pars,
                                            nullptr, nullptr, nullptr, 0, check_error,
                                            nullptr, nullptr);
@@ -978,7 +972,7 @@ namespace afterglowpy
         case INTEGRAL_TYPE::INT_TRAP_NL:
         {
             result = 2 * Fcoeff *
-                     integrate::trapNL_adapt(&phi_integrand, phi_0, phi_1,
+                     integrate::trapNL_adapt(phi_integrand, phi_0, phi_1,
                                              pars.nmax_phi, atol / (2 * Fcoeff),
                                              pars.rtol_phi, &pars, nullptr, nullptr,
                                              nullptr, 0, check_error, nullptr, nullptr);
@@ -987,14 +981,14 @@ namespace afterglowpy
         case INTEGRAL_TYPE::INT_SIMP_FIXED:
         {
             result = 2 * Fcoeff *
-                     integrate::simp(&phi_integrand, phi_0, phi_1, pars.nmax_phi, &pars,
+                     integrate::simp(phi_integrand, phi_0, phi_1, pars.nmax_phi, &pars,
                                      check_error);
         }
         break;
         case INTEGRAL_TYPE::INT_SIMP_ADAPT:
         {
             result = 2 * Fcoeff *
-                     integrate::simp_adapt(&phi_integrand, phi_0, phi_1, pars.nmax_phi,
+                     integrate::simp_adapt(phi_integrand, phi_0, phi_1, pars.nmax_phi,
                                            atol / (2 * Fcoeff), pars.rtol_phi, &pars,
                                            nullptr, nullptr, nullptr, 0, check_error,
                                            nullptr, nullptr);
@@ -1004,12 +998,12 @@ namespace afterglowpy
         {
             double phi_a = phi_0 + 0.5 * (phi_1 - phi_0);
             result = 2 * Fcoeff *
-                     integrate::romb(&phi_integrand, phi_0, phi_a, pars.nmax_phi,
+                     integrate::romb(phi_integrand, phi_0, phi_a, pars.nmax_phi,
                                      atol / (2 * Fcoeff), pars.rtol_phi, &pars, nullptr,
                                      nullptr, 0, check_error, nullptr, nullptr);
             err_chk_dbl(pars);
             result += 2 * Fcoeff *
-                      integrate::romb(&phi_integrand, phi_a, phi_1, pars.nmax_phi,
+                      integrate::romb(phi_integrand, phi_a, phi_1, pars.nmax_phi,
                                       (atol + pars.rtol_phi * result) / (2 * Fcoeff),
                                       pars.rtol_phi, &pars, nullptr, nullptr, 0,
                                       check_error, nullptr, nullptr);
@@ -1018,7 +1012,7 @@ namespace afterglowpy
         case INTEGRAL_TYPE::INT_HYBRID:
         {
             result = 2 * Fcoeff *
-                     integrate::hybrid_adapt(&phi_integrand, phi_0, phi_1,
+                     integrate::hybrid_adapt(phi_integrand, phi_0, phi_1,
                                              pars.nmax_phi, atol / (2 * Fcoeff),
                                              pars.rtol_phi, &pars, nullptr, nullptr, 0,
                                              check_error, nullptr, nullptr);
@@ -1027,7 +1021,7 @@ namespace afterglowpy
         case INTEGRAL_TYPE::INT_CADRE:
         {
             result = 2 * Fcoeff *
-                     integrate::cadre_adapt(&phi_integrand, phi_0, phi_1, pars.nmax_phi,
+                     integrate::cadre_adapt(phi_integrand, phi_0, phi_1, pars.nmax_phi,
                                             atol / (2 * Fcoeff), pars.rtol_phi, &pars,
                                             nullptr, nullptr, 0, check_error, nullptr,
                                             nullptr);
@@ -1036,7 +1030,7 @@ namespace afterglowpy
         case INTEGRAL_TYPE::INT_GK49_ADAPT:
         {
             result = 2 * Fcoeff *
-                     integrate::gk49_adapt(&phi_integrand, phi_0, phi_1, pars.nmax_phi,
+                     integrate::gk49_adapt(phi_integrand, phi_0, phi_1, pars.nmax_phi,
                                            atol / (2 * Fcoeff), pars.rtol_phi, &pars,
                                            nullptr, nullptr, 0, check_error);
         }
@@ -1044,7 +1038,7 @@ namespace afterglowpy
         case INTEGRAL_TYPE::INT_GK715_ADAPT:
         {
             result = 2 * Fcoeff *
-                     integrate::gk715_adapt(&phi_integrand, phi_0, phi_1, pars.nmax_phi,
+                     integrate::gk715_adapt(phi_integrand, phi_0, phi_1, pars.nmax_phi,
                                             atol / (2 * Fcoeff), pars.rtol_phi, &pars,
                                             nullptr, nullptr, 0, check_error);
         }
@@ -1053,7 +1047,7 @@ namespace afterglowpy
         {
             result =
                 2 * Fcoeff *
-                integrate::gk1021_adapt(&phi_integrand, phi_0, phi_1, pars.nmax_phi,
+                integrate::gk1021_adapt(phi_integrand, phi_0, phi_1, pars.nmax_phi,
                                         atol / (2 * Fcoeff), pars.rtol_phi, &pars,
                                         nullptr, nullptr, 0, check_error);
         }
@@ -1098,10 +1092,8 @@ namespace afterglowpy
         double theta_wing,
         fluxParams &pars)
     {
-        std::cout << Nt << "\n";
         set_jet_params(pars, E_iso, theta_wing);
         err_chk_void(pars);
-        std::cout << Nt << "\n";
         for (int i = 0; i < Nt; i++)
         {
             F[i] = flux_cone(t[i], nu[i], -1, -1, theta_core, theta_wing, 0.0, pars);
@@ -1120,17 +1112,11 @@ namespace afterglowpy
     {
         set_jet_params(pars, E_iso, theta_h);
         err_chk_void(pars);
-
         for (int i = 0; i < Nt; i++)
         {
             F[i] = flux_cone(t[i], nu[i], -1, -1, 0.0, theta_h, 0.0, pars);
             err_chk_void(pars);
         }
-        // for (auto &&i : F)
-        // {
-        //     std::cout << i << "\n";
-        // }
-        
     }
 
     void lc_struct(std::vector<double> &t, std::vector<double> &nu,
@@ -1291,9 +1277,15 @@ namespace afterglowpy
         }
     }
 
-    double flux_cone(double t_obs, double nu_obs, double E_iso, double theta_h,
-                     double theta_cone_low, double theta_cone_hi, double atol,
-                     fluxParams &pars)
+    double flux_cone(
+        double t_obs, 
+        double nu_obs, 
+        double E_iso, 
+        double theta_h,
+        double theta_cone_low, 
+        double theta_cone_hi, 
+        double atol,
+        fluxParams &pars)
     {
         // printf("      t: %.3le th1: %.3f th2 %.3f\n", t_obs, theta_cone_low,
         //         theta_cone_hi);
@@ -1316,7 +1308,6 @@ namespace afterglowpy
 
         F1 = flux(pars, atol);
         err_chk_dbl(pars);
-
         // // Counter-jet
         if (pars.counterjet)
         {
@@ -1517,9 +1508,17 @@ namespace afterglowpy
                               pars.table_entries);
     }
 
-    void intensity_cone(double *theta, double *phi, double *t, double *nu,
-                        double *I, int N, double E_iso_core, double theta_h_core,
-                        double theta_h_wing, fluxParams &pars)
+    void intensity_cone(
+        std::vector<double> &theta, 
+        std::vector<double> &phi, 
+        std::vector<double> &t, 
+        std::vector<double> &nu,
+        std::vector<double> &I, 
+        int N, 
+        double E_iso_core, 
+        double theta_h_core,
+        double theta_h_wing, 
+        fluxParams &pars)
     {
         // Intensity of a cone segment.
 
@@ -1574,10 +1573,19 @@ namespace afterglowpy
         }
     }
 
-    void intensity_struct(double *theta, double *phi, double *t, double *nu,
-                          double *I, int N, double E_iso_core, double theta_h_core,
-                          double theta_h_wing, int res_cones,
-                          double (*f_E)(double, void *), fluxParams &pars)
+    void intensity_struct(
+        std::vector<double> &theta, 
+        std::vector<double> &phi, 
+        std::vector<double> &t, 
+        std::vector<double> &nu,
+        std::vector<double> &I, 
+        int N,
+        double E_iso_core,
+        double theta_h_core, 
+        double theta_h_wing,
+        int res_cones, 
+        std::function<double(double, void *)> f_E,
+        fluxParams &pars)
     {
         // Intensity of a structured jet.
 
@@ -1653,11 +1661,19 @@ namespace afterglowpy
         }
     }
 
-    void intensity_structCore(double *theta, double *phi, double *t, double *nu,
-                              double *I, int N, double E_iso_core,
-                              double theta_h_core, double theta_h_wing,
-                              int res_cones, double (*f_E)(double, void *),
-                              fluxParams &pars)
+    void intensity_structCore(
+        std::vector<double> &theta, 
+        std::vector<double> &phi, 
+        std::vector<double> &t, 
+        std::vector<double> &nu,
+        std::vector<double> &I, 
+        int N,
+        double E_iso_core,
+        double theta_h_core, 
+        double theta_h_wing,
+        int res_cones, 
+        std::function<double(double, void *)> f_E,
+        fluxParams &pars)
     {
         // Intensity of a structured jet.
 
@@ -1955,8 +1971,8 @@ namespace afterglowpy
     void calc_flux_density(
         int jet_type,
         int spec_type,
-        std::vector<double> t,
-        std::vector<double> nu,
+        std::vector<double> &t,
+        std::vector<double> &nu,
         std::vector<double> &Fnu,
         int N,
         fluxParams &fp)
@@ -2018,15 +2034,23 @@ namespace afterglowpy
         // printf("  Calc took %ld evalutions\n", fp.nevals);
     }
 
-    void calc_intensity(int jet_type, int spec_type, double *theta, double *phi,
-                        double *t, double *nu, double *Inu, int N, fluxParams &fp)
+    void calc_intensity(
+        int jet_type, 
+        int spec_type, 
+        std::vector<double> &theta, 
+        std::vector<double> &phi,
+        std::vector<double> &t, 
+        std::vector<double> &nu, 
+        std::vector<double> &Inu, 
+        int N, 
+        fluxParams &fp)
     {
-        int latRes = fp.latRes;
-        double E_iso_core = fp.E_iso_core;
+        int latRes          = fp.latRes;
+        double E_iso_core   = fp.E_iso_core;
         double theta_h_core = fp.theta_core;
         double theta_h_wing = fp.theta_wing;
 
-        int res_cones = (int)(latRes * theta_h_wing / theta_h_core);
+        int res_cones = static_cast<int>(latRes * theta_h_wing / theta_h_core);
 
         if (jet_type == _tophat)
         {
@@ -2041,22 +2065,22 @@ namespace afterglowpy
         else if (jet_type == _Gaussian)
         {
             intensity_struct(theta, phi, t, nu, Inu, N, E_iso_core, theta_h_core,
-                             theta_h_wing, res_cones, &f_E_Gaussian, fp);
+                             theta_h_wing, res_cones, f_E_Gaussian, fp);
         }
         else if (jet_type == _powerlaw)
         {
             intensity_struct(theta, phi, t, nu, Inu, N, E_iso_core, theta_h_core,
-                             theta_h_wing, res_cones, &f_E_powerlaw, fp);
+                             theta_h_wing, res_cones, f_E_powerlaw, fp);
         }
         else if (jet_type == _Gaussian_core)
         {
             intensity_structCore(theta, phi, t, nu, Inu, N, E_iso_core, theta_h_core,
-                                 theta_h_wing, res_cones, &f_E_GaussianCore, fp);
+                                 theta_h_wing, res_cones, f_E_GaussianCore, fp);
         }
         else if (jet_type == _powerlaw_core)
         {
             intensity_structCore(theta, phi, t, nu, Inu, N, E_iso_core, theta_h_core,
-                                 theta_h_wing, res_cones, &f_E_powerlawCore, fp);
+                                 theta_h_wing, res_cones, f_E_powerlawCore, fp);
         }
     }
 
@@ -2114,7 +2138,7 @@ namespace afterglowpy
                           double theta_core_global, double ta, double tb, int tRes,
                           int latRes, INTEGRAL_TYPE int_type, double rtol_struct,
                           double rtol_phi, double rtol_theta, int nmax_phi,
-                          int nmax_theta, int spec_type, std::vector<double> mask,
+                          int nmax_theta, int spec_type, std::vector<double> &mask,
                           int nmask, int spread, int counterjet,
                           GAMMA_TYPE gamma_type)
     {
@@ -2316,7 +2340,7 @@ namespace afterglowpy
 
     int check_error(void *params)
     {
-        fluxParams fp = *(fluxParams *)params;
+        fluxParams &fp = *(fluxParams *)params;
         return fp.error;
     }
 

@@ -314,7 +314,7 @@ namespace afterglowpy
      * @param N
      * @return double
      */
-    double check_t_e(double t_e, double mu, double t_obs, std::vector<double> mu_table, int N);
+    double check_t_e(double t_e, double mu, double t_obs, std::vector<double> &mu_table, int N);
 
     /**
      * @brief
@@ -324,7 +324,7 @@ namespace afterglowpy
      * @param N
      * @return int
      */
-    int searchSorted(double x, std::vector<double> arr, int N);
+    int searchSorted(double x, std::vector<double> &arr, int N);
 
     /**
      * @brief Perform linear interpolation
@@ -337,7 +337,7 @@ namespace afterglowpy
      * @param N
      * @return double
      */
-    double interpolateLin(int a, int b, double x, std::vector<double> X, std::vector<double> Y, int N);
+    double interpolateLin(int a, int b, double x, std::vector<double> &X, std::vector<double> &Y, int N);
 
     /**
      * @brief Perform logarithmic interpolation
@@ -350,7 +350,7 @@ namespace afterglowpy
      * @param N
      * @return double
      */
-    double interpolateLog(int a, int b, double x, std::vector<double> X, std::vector<double> Y, int N);
+    double interpolateLog(int a, int b, double x, std::vector<double> &X, std::vector<double> &Y, int N);
 
     /**
      * @brief Compute the jet edge extremum
@@ -365,7 +365,7 @@ namespace afterglowpy
      * @return double
      */
     double find_jet_edge(double phi, double cto, double sto, double theta0,
-                        std::vector<double> a_mu, std::vector<double> a_thj, int N);
+                        std::vector<double> &a_mu, std::vector<double> &a_thj, int N);
 
     /**
      * @brief Cosine theta integrand in spherical coordinate jacobican
@@ -402,9 +402,19 @@ namespace afterglowpy
      * @param specType
      * @return double
      */
-    double emissivity(double nu, double R, double mu, double te,
-                    double u, double us, double n0, double p, double epse,
-                    double epsB, double ksiN, int specType);
+    double emissivity(
+        double nu, 
+        double R, 
+        double mu, 
+        double te,
+        double u, 
+        double us, 
+        double n0, 
+        double p, 
+        double epse,
+        double epsB, 
+        double ksiN, 
+        int specType);
 
     /**
      * @brief Compute zone flux given t_obs
@@ -445,9 +455,15 @@ namespace afterglowpy
      * @param pars
      * @return double
      */
-    double intensity(double theta, double phi, double tobs, double nuobs,
-                    double theta_obs, double theta_cone_hi, double theta_cone_low,
-                    fluxParams &pars);
+    double intensity(
+        double theta, 
+        double phi, 
+        double tobs, 
+        double nuobs,
+        double theta_obs, 
+        double theta_cone_hi, 
+        double theta_cone_low,
+        fluxParams &pars);
 
     /**
      * @brief Compute primitive variables in the shock
@@ -464,10 +480,18 @@ namespace afterglowpy
      * @param theta_cone_low
      * @param pars
      */
-    void shockVals(double theta, double phi, double tobs,
-                std::vector<double> t, std::vector<double> R, std::vector<double> u, std::vector<double> thj,
-                double theta_obs, double theta_cone_hi, double theta_cone_low,
-                fluxParams &pars);
+    void shockVals(
+        double theta, 
+        double phi, 
+        double tobs,
+        std::vector<double> &t, 
+        std::vector<double> &R, 
+        std::vector<double> &u, 
+        std::vector<double> &thj,
+        double theta_obs, 
+        double theta_cone_hi, 
+        double theta_cone_low,
+        fluxParams &pars);
 
     /**
      * @brief Compute intensity in a conical blast wave
@@ -483,10 +507,17 @@ namespace afterglowpy
      * @param theta_h_wing
      * @param pars
      */
-    void intensity_cone(std::vector<double> theta, std::vector<double> phi, std::vector<double> t, std::vector<double> nu,
-                        std::vector<double> I, int N, double E_iso_core,
-                        double theta_h_core, double theta_h_wing,
-                        fluxParams &pars);
+    void intensity_cone(
+        std::vector<double> &theta, 
+        std::vector<double> &phi, 
+        std::vector<double> &t, 
+        std::vector<double> &nu,
+        std::vector<double> &I, 
+        int N, 
+        double E_iso_core,
+        double theta_h_core, 
+        double theta_h_wing,
+        fluxParams &pars);
 
     /**
      * @brief Compute  complete intensity profile
@@ -504,12 +535,19 @@ namespace afterglowpy
      * @param f_E
      * @param pars
      */
-    void intensity_struct(std::vector<double> theta, std::vector<double> phi, std::vector<double> t, std::vector<double> nu,
-                        std::vector<double> I, int N,
-                        double E_iso_core,
-                        double theta_h_core, double theta_h_wing,
-                        int res_cones, std::function<double(double, void *)> func,
-                        fluxParams &pars);
+    void intensity_struct(
+        std::vector<double> &theta, 
+        std::vector<double> &phi, 
+        std::vector<double> &t, 
+        std::vector<double> &nu,
+        std::vector<double> &I, 
+        int N,
+        double E_iso_core,
+        double theta_h_core, 
+        double theta_h_wing,
+        int res_cones, 
+        std::function<double(double, void *)> func,
+        fluxParams &pars);
 
     /**
      * @brief Compute intensity structure in a core
@@ -527,12 +565,19 @@ namespace afterglowpy
      * @param f_E
      * @param pars
      */
-    void intensity_structCore(std::vector<double> theta, std::vector<double> phi, std::vector<double> t, std::vector<double> nu,
-                            std::vector<double> I, int N,
-                            double E_iso_core,
-                            double theta_h_core, double theta_h_wing,
-                            int res_cones, std::function<double(double, void *)> func,
-                            fluxParams &pars);
+    void intensity_structCore(
+        std::vector<double> &theta, 
+        std::vector<double> &phi, 
+        std::vector<double> &t, 
+        std::vector<double> &nu,
+        std::vector<double> &I, 
+        int N,
+        double E_iso_core,
+        double theta_h_core, 
+        double theta_h_wing,
+        int res_cones, 
+        std::function<double(double, void *)> func,
+        fluxParams &pars);
 
     /**
      * @brief Compute primitive shock variables in a core structure
@@ -550,10 +595,19 @@ namespace afterglowpy
      * @param theta_h_wing
      * @param pars
      */
-    void shockVals_cone(std::vector<double> theta, std::vector<double> phi, std::vector<double> tobs,
-                        std::vector<double> t, std::vector<double> R, std::vector<double> u, std::vector<double> thj, int N,
-                        double E_iso_core, double theta_h_core, double theta_h_wing,
-                        fluxParams &pars);
+    void shockVals_cone(
+        std::vector<double> &theta, 
+        std::vector<double> &phi, 
+        std::vector<double> &tobs,
+        std::vector<double> &t, 
+        std::vector<double> &R, 
+        std::vector<double> &u, 
+        std::vector<double> &thj, 
+        int N,
+        double E_iso_core,
+        double theta_h_core, 
+        double theta_h_wing,
+        fluxParams &pars);
 
     /**
      * @brief Compute shock primitive values in non-core structure
@@ -573,12 +627,21 @@ namespace afterglowpy
      * @param f_E
      * @param pars
      */
-    void shockVals_struct(std::vector<double> theta, std::vector<double> phi, std::vector<double> tobs,
-                        std::vector<double> t, std::vector<double> R, std::vector<double> u, std::vector<double> thj, int N,
-                        double E_iso_core,
-                        double theta_h_core, double theta_h_wing,
-                        int res_cones, std::function<double(double, void *)> func,
-                        fluxParams &pars);
+    void shockVals_struct(
+        std::vector<double> &theta, 
+        std::vector<double> &phi, 
+        std::vector<double> &tobs,
+        std::vector<double> &t, 
+        std::vector<double> &R, 
+        std::vector<double> &u, 
+        std::vector<double> &thj, 
+        int N,
+        double E_iso_core,
+        double theta_h_core, 
+        double theta_h_wing,
+        int res_cones, 
+        std::function<double(double, void *)> func,
+        fluxParams &pars);
 
     /**
      * @brief Compute shock primitives in core strucrure
@@ -598,12 +661,21 @@ namespace afterglowpy
      * @param f_E
      * @param pars
      */
-    void shockVals_structCore(std::vector<double> theta, std::vector<double> phi, std::vector<double> tobs,
-                            std::vector<double> t, std::vector<double> R, std::vector<double> u, std::vector<double> thj, int N,
-                            double E_iso_core,
-                            double theta_h_core, double theta_h_wing,
-                            int res_cones, std::function<double(double, void *)> func,
-                            fluxParams &pars);
+    void shockVals_structCore(
+        std::vector<double> &theta, 
+        std::vector<double> &phi, 
+        std::vector<double> &tobs,
+        std::vector<double> &t, 
+        std::vector<double> &R, 
+        std::vector<double> &u, 
+        std::vector<double> &thj, 
+        int N,
+        double E_iso_core,
+        double theta_h_core, 
+        double theta_h_wing,
+        int res_cones, 
+        std::function<double(double, void *)> func,
+        fluxParams &pars);
 
     /**
      * @brief Compute light curve for a tophat blast wave
@@ -664,16 +736,16 @@ namespace afterglowpy
      * @param pars
      */
     void lc_powerlawCore(
-        std::vector<double> t, 
-        std::vector<double> nu, 
-        std::vector<double> F, 
+        std::vector<double> &t, 
+        std::vector<double> &nu, 
+        std::vector<double> &F, 
         int Nt,
         double E_iso_core, 
         double theta_h_core,
         double theta_h_wing, 
         double beta,
-        std::vector<double> theta_c_arr, 
-        std::vector<double> E_iso_arr,
+        std::vector<double> &theta_c_arr, 
+        std::vector<double> &E_iso_arr,
         int res_cones, fluxParams &pars);
 
     /**
@@ -691,11 +763,17 @@ namespace afterglowpy
      * @param res_cones
      * @param pars
      */
-    void lc_powerlaw(std::vector<double> t, std::vector<double> nu, std::vector<double> F, int Nt,
-                    double E_iso_core, double theta_h_core,
-                    double theta_h_wing,
-                    std::vector<double> theta_c_arr, std::vector<double> E_iso_arr,
-                    int res_cones, fluxParams &pars);
+    void lc_powerlaw(
+        std::vector<double> &t, 
+        std::vector<double> &nu, 
+        std::vector<double> &F, 
+        int Nt,
+        double E_iso_core, 
+        double theta_h_core,
+        double theta_h_wing,
+        std::vector<double> &theta_c_arr, 
+        std::vector<double> &E_iso_arr,
+        int res_cones, fluxParams &pars);
 
     /**
      * @brief Compyte light curve in Gaussian structure
@@ -712,11 +790,17 @@ namespace afterglowpy
      * @param res_cones
      * @param pars
      */
-    void lc_Gaussian(std::vector<double> t, std::vector<double> nu, std::vector<double> F, int Nt,
-                    double E_iso_core,
-                    double theta_h_core, double theta_h_wing,
-                    std::vector<double> theta_c_arr, std::vector<double> E_iso_arr,
-                    int res_cones, fluxParams &pars);
+    void lc_Gaussian(
+        std::vector<double> &t, 
+        std::vector<double> &nu, 
+        std::vector<double> &F, 
+        int Nt,
+        double E_iso_core,
+        double theta_h_core, 
+        double theta_h_wing,
+        std::vector<double> &theta_c_arr, 
+        std::vector<double> &E_iso_arr,
+        int res_cones, fluxParams &pars);
 
     /**
      * @brief Compute light curve in Gaussian core structure
@@ -733,10 +817,10 @@ namespace afterglowpy
      * @param res_cones
      * @param pars
      */
-    void lc_GaussianCore(std::vector<double> t, std::vector<double> nu, std::vector<double> F, int Nt,
+    void lc_GaussianCore(std::vector<double> &t, std::vector<double> &nu, std::vector<double> &F, int Nt,
                         double E_iso_core,
                         double theta_h_core, double theta_h_wing,
-                        std::vector<double> theta_c_arr, std::vector<double> E_iso_arr,
+                        std::vector<double> &theta_c_arr, std::vector<double> &E_iso_arr,
                         int res_cones, fluxParams pars);
 
     /**
@@ -753,8 +837,8 @@ namespace afterglowpy
     void calc_flux_density(
         int jet_type, 
         int spec_type, 
-        std::vector<double> t,
-        std::vector<double> nu, 
+        std::vector<double> &t,
+        std::vector<double> &nu, 
         std::vector<double> &Fnu, 
         int N,
         fluxParams &fp);
@@ -772,9 +856,16 @@ namespace afterglowpy
      * @param N
      * @param fp
      */
-    void calc_intensity(int jet_type, int spec_type, std::vector<double> theta, std::vector<double> phi,
-                        std::vector<double> t, std::vector<double> nu, std::vector<double> Inu, int N,
-                        fluxParams &fp);
+    void calc_intensity(
+        int jet_type, 
+        int spec_type, 
+        std::vector<double> &theta, 
+        std::vector<double> &phi,
+        std::vector<double> &t, 
+        std::vector<double> &nu, 
+        std::vector<double> &Inu, 
+        int N,
+        fluxParams &fp);
 
     /**
      * @brief Calculate the shock primitive values
@@ -790,8 +881,8 @@ namespace afterglowpy
      * @param N
      * @param fp
      */
-    void calc_shockVals(int jet_type, std::vector<double> theta, std::vector<double> phi, std::vector<double> tobs,
-                        std::vector<double> t, std::vector<double> R, std::vector<double> u, std::vector<double> thj, int N,
+    void calc_shockVals(int jet_type, std::vector<double> &theta, std::vector<double> &phi, std::vector<double> &tobs,
+                        std::vector<double> &t, std::vector<double> &R, std::vector<double> &u, std::vector<double> &thj, int N,
                         fluxParams &p);
 
     /**
@@ -862,7 +953,7 @@ namespace afterglowpy
         int nmax_phi, 
         int nmax_theta,
         int spec_type,
-        std::vector<double> mask, 
+        std::vector<double> &mask, 
         int nmask,
         int spread, int counterjet, 
         GAMMA_TYPE gamma_type);

@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import afterglowpy as grb
 
-Z = {'jetType':     grb.jet.TopHat,     # Top-Hat jet
+Z = {'jetType':     grb.Jet.TopHat,     # Top-Hat jet
      'specType':    0,                  # Basic Synchrotron Emission Spectrum
 
      'thetaObs':    0.05,   # Viewing angle in radians
@@ -44,6 +44,6 @@ ax.set_xlabel(r'$\nu$ (Hz)')
 ax.set_ylabel(r'$F_\nu$[1 day] (mJy)')
 
 fig.tight_layout()
-print("Saving figure spec.png")
-fig.savefig("spec.png")
+print("Saving figure spec.pdf")
+fig.savefig("spec.pdf")
 plt.close(fig)

@@ -27,8 +27,8 @@ namespace afterglowpy
         template <typename T>
         struct MeshBase 
         {
-            MeshBase(int size = 4, int N = 0) : totalSize(size), N(N) {
-                heap.reserve(size);
+            MeshBase(int size = 4, int N = 0) : totalSize(size), N(N), heap(std::vector<T>(50)) {
+                
             };
 
             // ~MeshBase<T>();

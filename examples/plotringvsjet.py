@@ -29,7 +29,7 @@ def main():
     else:
         eiso_label = r'$E_{{\rm iso}} = %1.f \times 10^{%d} \rm erg$'%(front_part(eiso), order_of_mag(eiso))
     # For convenience, place arguments into a dict.
-    Zjet = {'jetType':     grb.jet.TopHat,     # Top-Hat jet
+    Zjet = {'jetType':     grb.Jet.TopHat,     # Top-Hat jet
         'specType':    0,                  # Basic Synchrotron Emission Spectrum
         'spread':      False,
         'thetaObs':    0.00,   # Viewing angle in radians
@@ -44,7 +44,7 @@ def main():
         'z':           0.0}   # redshift
 
     Zring = {
-        'jetType':     grb.jet.Cone,     # Top-Hat jet
+        'jetType':     grb.Jet.Cone,     # Top-Hat jet
         'specType':    0,                  # Basic Synchrotron Emission Spectrum
         'spread':      False,
         'thetaObs':    np.pi / 2.0,   # Viewing angle in radians
@@ -62,7 +62,7 @@ def main():
 
     if args.sring:
         Zring2 = {
-            'jetType':     grb.jet.Ring,     # Top-Hat jet
+            'jetType':     grb.Jet.Ring,     # Top-Hat jet
             'specType':    0,                  # Basic Synchrotron Emission Spectrum
             'spread':      False,
             'thetaObs':    np.pi / 2.0,   # Viewing angle in radians

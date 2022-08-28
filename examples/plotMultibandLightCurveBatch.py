@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import afterglowpy as grb
 
 # Jet Parameters
-Z = {'jetType':     grb.jet.Gaussian,     # Gaussian jet
+Z = {'jetType':     grb.Jet.Gaussian,     # Gaussian jet
      'specType':    0,                  # Basic Synchrotron Emission Spectrum
 
      'thetaObs':    0.3,   # Viewing angle in radians
@@ -55,6 +55,6 @@ ax.set_ylabel(r'$F_\nu$ (mJy)')
 ax.legend()
 fig.tight_layout()
 
-print("Saving lc_multi_batch.png")
-fig.savefig("lc_multi_batch.png")
+print("Saving lc_multi_batch.pdf")
+fig.savefig("lc_multi_batch.pdf")
 plt.close(fig)

@@ -817,13 +817,14 @@ namespace afterglowpy
             {
                 i.fa = func(i.a, args);
                 count++;
+                // return 0;
                 if(errf(args))
                     return count;
             }
             else {
                 i.fa = *pfa;
             }
-
+            
             if(!pfb)
             {
                 i.fb = func(i.b, args);
@@ -1605,7 +1606,6 @@ namespace afterglowpy
                 return 0.0;
             }
             m.insert(i);
-
             double I           = i.I;
             double err         = i.err;
             int num_intervals  = 1;
@@ -1620,13 +1620,6 @@ namespace afterglowpy
                 m.intervalWrite(i, stdout);
             }
 
-            // static int ccount = 0;
-            // ccount++;
-            // if (err != 0) {
-            //     printf("call count: %d, err: %.2e\n", ccount, err);
-            //     getchar();
-            // }
-            // printf("terms before loop, i: %.2e, atol: %.2e, rtol: %.2e, I: %.2e\n", i.err, atol, rtol, I);;
             while(n < Nmax && err > atol + rtol*std::abs(I))
             {
                 m.extract(i);
@@ -1662,12 +1655,9 @@ namespace afterglowpy
                     {
                         return 0.0;
                     }
-                    // printf("mesh at 0: %.2e\n", m.heap[0].err);
                     m.insert(i1);
                     m.insert(i2);
-                    // printf("mesh at 0: %.2e\n", m.heap[0].err);
                     num_intervals++;
-                    // printf("i1 err: %.2e, i2: %.2e, i0: %.2e\n", i1.err, i2.err, i.err);
                     err += i1.err + i2.err - i.err;
                     I   += i1.I + i2.I - i.I;
 
@@ -1691,12 +1681,6 @@ namespace afterglowpy
                 }
                 num_iterations++;
             }
-            // static int ccount = 0;
-            // ccount++;
-            // if (err != 0) {
-            //     printf("call count: %d, err: %.2e\n", ccount, err);
-            //     getchar();
-            // }
             I = m.totalIntergral();
 
             if(Neval)
@@ -1711,7 +1695,6 @@ namespace afterglowpy
             if(mout)
                 *mout = m;
             
-            // std::cout << I << ", " << Nmax << "\n";
             return I;
         }
 
@@ -1738,7 +1721,6 @@ namespace afterglowpy
             */
 
             int count = 0;
-
             int nk = ng + 1;
 
             double fg[max_gauss_n];

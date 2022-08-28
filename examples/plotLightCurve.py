@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import afterglowpy as grb
 
 # For convenience, place arguments into a dict.
-Z = {'jetType':     grb.jet.TopHat,     # Top-Hat jet
+Z = {'jetType':     grb.Jet.TopHat,     # Top-Hat jet
      'specType':    0,                  # Basic Synchrotron Emission Spectrum
 
      'thetaObs':    0.05,   # Viewing angle in radians
@@ -48,6 +48,6 @@ ax.set(xscale='log', xlabel=r'$t$ (s)',
        yscale='log', ylabel=r'$F_\nu$[$10^{18}$ Hz] (mJy)')
 
 fig.tight_layout()
-print("Saving figure lc.png")
-fig.savefig("lc.png")
+print("Saving figure lc.pdf")
+fig.savefig("lc.pdf")
 plt.close(fig)

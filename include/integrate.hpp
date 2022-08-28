@@ -23,7 +23,6 @@
 /*
  * Integration routines
  */
-
 namespace afterglowpy
 {
     namespace integrate
