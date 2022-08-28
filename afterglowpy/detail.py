@@ -77,7 +77,6 @@ default_params = {
     "epsilon_e": 0.1,
     "epsilon_b": 0.1,
     "xi_N": 1.0,
-    "theta_wing": 0.1,
     "thetaWing": 0.1,
     "mask": np.empty(1),
     "nmask": 0,   
