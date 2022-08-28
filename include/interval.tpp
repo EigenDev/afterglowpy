@@ -3,9 +3,6 @@ namespace afterglowpy
 {
     namespace mesh
     {
-        // template<typename T>
-        // MeshBase<T>::MeshBase(int size = 4, int N = 0) : totalSize(size), N(N), heap(std::vector<T>(size)) {};
-
         template <typename T>
         void MeshBase<T>::insert(T &interval)
         {
@@ -20,7 +17,6 @@ namespace afterglowpy
         template <typename T>
         void MeshBase<T>::extract(T &worst)
         {
-            // printf("changing i to: %.2e\n", heap[0].err);
             worst   = heap[0];
             heap[0] = heap[N - 1];
             N--;
@@ -75,11 +71,6 @@ namespace afterglowpy
                 c = p;
                 p = (c - 1) / 2;
             }
-            // for (int i =0; i < N; i++)
-            // {
-            //     printf("N: %d, val: %.2e\n", N, heap[i].err);
-            // }
-            // getchar();
         }
 
         template<typename T>
