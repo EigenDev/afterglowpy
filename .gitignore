@@ -8,6 +8,7 @@ afterglowpy.egg-info/
 .github/*
 build/
 dist/
+src/afterglowpy_ext.cpp
 *egg-info*
 *.png
 *.json
