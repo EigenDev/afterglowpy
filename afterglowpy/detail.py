@@ -35,9 +35,6 @@ class Jet(IntEnum):
     Ring           = 8,
     
 default_params = {
-    "jet_type":  -1,
-    "spec_type":  0,
-    "theta_obs":  0.0,
     "E_iso_core":  1.0e53,
     "theta_h_core":  0.1,
     "theta_h_wing":  0.4,
@@ -47,8 +44,6 @@ default_params = {
     "ts": 0.0, 
     "n_0": 1.0,
     "p": 2.2,
-    "epsilon_E": 0.1,
-    "epsilon_B": 0.01,
     "ksi_N": 1.0, 
     "d_L": 1.0e28,
 
@@ -74,8 +69,8 @@ default_params = {
     "E0": 1e53,
     "thetaCore": 0.1,
     "n0": 1,
-    "epsilon_e": 0.1,
-    "epsilon_b": 0.1,
+    "epsilon_E": 0.1,
+    "epsilon_B": 0.1,
     "xi_N": 1.0,
     "thetaWing": 0.1,
     "mask": np.empty(1),
