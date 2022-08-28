@@ -21,13 +21,13 @@ def fluxDensity(t, nu, *args, **kwargs):
     the future. To call a jetted model with positional and keyword arguments::
 
         Fnu = fluxDensity(t, nu, jetType, specType, thetaObs, E0, thetaCore,
-                          thetaWing, b, L0, q, ts, n0, p, epsilon_e, epsilon_B,
+                          thetaWing, b, L0, q, ts, n0, p, epsilon_E, epsilon_B,
                           xi_N, d_L, **Z)
 
     To call a spherical refreshed shock model with positional arguments::
 
         Fnu = fluxDensity(t, nu, Jet.Spherical, specType, uMax, uMin, Er, k,
-                          MFast_solar, L0, q, ts, n0, p, epsilon_e, epsilon_B,
+                          MFast_solar, L0, q, ts, n0, p, epsilon_E, epsilon_B,
                           xi_N, d_L, **Z)
 
 
@@ -63,8 +63,8 @@ def fluxDensity(t, nu, *args, **kwargs):
     p : float
         Power law index of relativistic electron energy distribution,
         generally p > 2.
-    epsilon_e : float
-        Fraction of thermal energy in relativistic electrons, epsilon_e <= 1.
+    epsilon_E : float
+        Fraction of thermal energy in relativistic electrons, epsilon_E <= 1.
     epsilon_B : float
         Fraction of thermal energy in magnetic field, epsilon_B <= 1.
     xi_N : float
@@ -256,7 +256,7 @@ def intensity(theta, phi, t, nu, *args, **kwargs):
     the future. To call a jetted model with positional and keyword arguments::
 
         Inu = fluxDensity(theta, phi, t, nu, jetType, specType, thetaObs, E0,
-                          thetaCore, thetaWing, b, L0, q, ts, n0, p, epsilon_e,
+                          thetaCore, thetaWing, b, L0, q, ts, n0, p, epsilon_E,
                           epsilon_B, xi_N, d_L, **Z)
 
     This is currently only implemented for jetted models. Do not use with
@@ -301,8 +301,8 @@ def intensity(theta, phi, t, nu, *args, **kwargs):
     p : float
         Power law index of relativistic electron energy distribution,
         generally p > 2.
-    epsilon_e : float
-        Fraction of thermal energy in relativistic electrons, epsilon_e <= 1.
+    epsilon_E : float
+        Fraction of thermal energy in relativistic electrons, epsilon_E <= 1.
     epsilon_B : float
         Fraction of thermal energy in magnetic field, epsilon_B <= 1.
     xi_N : float
@@ -518,7 +518,7 @@ def checkJetArgs(**argsDict):
     theta_c = argsDict['thetaCore']
     n0 = argsDict['n0']
     p = argsDict['p']
-    epse = argsDict['epsilon_e']
+    epse = argsDict['epsilon_E']
     epsB = argsDict['epsilon_B']
     xiN = argsDict['xi_N']
     dL = argsDict['d_L']
@@ -539,7 +539,7 @@ def checkJetArgs(**argsDict):
     if specType == 2 and p <= 1.0:
         raise ValueError("p must be in (1, inf)")
     if epse <= 0.0 or epse > 1.0:
-        raise ValueError("epsilon_e must be in (0, 1]")
+        raise ValueError("epsilon_E must be in (0, 1]")
     if epsB <= 0.0 or epsB > 1.0:
         raise ValueError("epsilon_B must be in (0, 1]")
     if xiN <= 0.0 or xiN > 1.0:
@@ -619,7 +619,7 @@ def checkCocoonArgs(**argsDict):
     MFast = argsDict['MFast_solar']
     n0 = argsDict['n0']
     p = argsDict['p']
-    epse = argsDict['epsilon_e']
+    epse = argsDict['epsilon_E']
     epsB = argsDict['epsilon_B']
     xiN = argsDict['xi_N']
     dL = argsDict['d_L']
@@ -639,7 +639,7 @@ def checkCocoonArgs(**argsDict):
     if specType == 2 and p <= 1.0:
         raise ValueError("p must be in (1, inf)")
     if epse <= 0.0 or epse > 1.0:
-        raise ValueError("epsilon_e must be in (0, 1]")
+        raise ValueError("epsilon_E must be in (0, 1]")
     if epsB <= 0.0 or epsB > 1.0:
         raise ValueError("epsilon_B must be in (0, 1]")
     if xiN <= 0.0 or xiN > 1.0:
@@ -699,10 +699,10 @@ def parseArgs(args, kwargs):
     # Now for the fun part
 
     jetKeys = ['jetType', 'specType', 'thetaObs', 'E0', 'thetaCore',
-               'thetaWing', 'b', 'L0', 'q', 'ts', 'n0', 'p', 'epsilon_e',
+               'thetaWing', 'b', 'L0', 'q', 'ts', 'n0', 'p', 'epsilon_E',
                'epsilon_B', 'xi_N', 'd_L', 'g0', 'LR', 'LO', 'LX', 'tAdd', 'z']
     sphKeys = ['jetType', 'specType', 'uMax', 'uMin', 'Er',
-               'k', 'MFast_solar', 'L0', 'q', 'ts', 'n0', 'p', 'epsilon_e',
+               'k', 'MFast_solar', 'L0', 'q', 'ts', 'n0', 'p', 'epsilon_E',
                'epsilon_B', 'xi_N', 'd_L', 'g0', 'LR', 'LO', 'LX', 'tAdd', 'z']
 
     jetType = args[0]

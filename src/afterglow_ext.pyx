@@ -258,7 +258,7 @@ def spherical_flux_density_wrapper(t, nu, **kwargs):
     MFast_solar = kwargs['MFast_solar']
     n0          = kwargs['n0']
     p           = kwargs['p']
-    epsilon_e   = kwargs['epsilon_e']
+    epsilon_E   = kwargs['epsilon_E']
     epsilon_B   = kwargs['epsilon_B']
     ksiN        = kwargs['xi_N']
     dL          = kwargs['d_L']
@@ -317,7 +317,7 @@ def spherical_flux_density_wrapper(t, nu, **kwargs):
     for i in range(len(t)):
         amu = c * (ate - t[i]) / ar
 
-        args = (amu, ate, au, ar, nu[i], n0, p, epsilon_e, epsilon_B, ksiN,
+        args = (amu, ate, au, ar, nu[i], n0, p, epsilon_E, epsilon_B, ksiN,
                 specType)
 
         res = integrate.quad(dP, 0.0, 1.0, args, full_output=1, wopts=wopts,

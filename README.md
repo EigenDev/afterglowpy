@@ -72,7 +72,7 @@ For jet-like afterglows (`jetTypes` -2, -1, 0, 1, 2, and 4) `pars` has 14 positi
 - `7 ts` Fiducial time-scale for energy injection, in seconds, typically 0.
 - `8 n0` Number density of ISM, in cm<sup>-3</sup>
 - `9 p` Electron distribution power-law index (p>2)
-- `10 epsilon_e` Thermal energy fraction in electrons
+- `10 epsilon_E` Thermal energy fraction in electrons
 - `11 epsilon_B` Thermal energy fraction in magnetic field
 - `12 xi_N` Fraction of electrons that get accelerated
 - `13 d_L` Luminosity distance in cm
@@ -88,7 +88,7 @@ For cocoon-like afterglows (`jetType` 3) `pars` has 14 positional arguments:
 - `7 ts` Fiducial time-scale for energy injection, in seconds, typically 0.
 - `8 n0` Number density of ISM, in cm<sup>-3</sup>
 - `9 p` Electron distribution power-law index (p>2)
-- `10 epsilon_e` Thermal energy fraction in electrons
+- `10 epsilon_E` Thermal energy fraction in electrons
 - `11 epsilon_B` Thermal energy fraction in magnetic field
 - `12 xi_N` Fraction of electrons that get accelerated
 - `13 d_L` Luminosity distance in cm

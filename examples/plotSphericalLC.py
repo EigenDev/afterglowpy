@@ -10,7 +10,7 @@ params = {
     "E0": 1e53,
     "thetaCore": 0.1,
     "n0": 1,
-    "epsilon_e": 0.1,
+    "epsilon_E": 0.1,
     "epsilon_b": 0.1,
     "xi_N": 1.0,
     "thetaWing": 0.1,

@@ -12,7 +12,7 @@ Z = {'jetType':     grb.Jet.Gaussian,     # Gaussian jet
      'thetaWing':   0.4,    # Outer truncation angle
      'n0':          1.0e-3,    # circumburst density in cm^{-3}
      'p':           2.2,    # electron energy distribution index
-     'epsilon_e':   0.1,    # epsilon_e
+     'epsilon_E':   0.1,    # epsilon_E
      'epsilon_B':   0.0001,   # epsilon_B
      'xi_N':        1.0,    # Fraction of electrons accelerated
      'd_L':         1.36e26, # Luminosity distance in cm

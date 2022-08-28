@@ -37,7 +37,7 @@ def main():
         'thetaCore':   0.1,    # Half-opening angle in radians
         'n0':          1.0,    # circumburst density in cm^{-3}
         'p':           2.5,    # electron energy distribution index
-        'epsilon_e':   0.1,    # epsilon_e
+        'epsilon_E':   0.1,    # epsilon_E
         'epsilon_B':   0.1,   # epsilon_B
         'xi_N':        1.0,    # Fraction of electrons accelerated
         'd_L':         1.0e28, # Luminosity distance in cm
@@ -54,7 +54,7 @@ def main():
         'counterjet':  True,
         'n0':          1.0,    # circumburst density in cm^{-3}
         'p':           2.5,    # electron energy distribution index
-        'epsilon_e':   0.1,    # epsilon_er'$E_{\rm iso} = 10^{53} \rm erg$'
+        'epsilon_E':   0.1,    # epsilon_Er'$E_{\rm iso} = 10^{53} \rm erg$'
         'epsilon_B':   0.1,   # epsilon_B
         'xi_N':        1.0,    # Fraction of electrons accelerated
         'd_L':         1.0e28, # Luminosity distance in cm
@@ -72,7 +72,7 @@ def main():
             'counterjet':  True,
             'n0':          1.0,    # circumburst density in cm^{-3}
             'p':           2.5,    # electron energy distribution index
-            'epsilon_e':   0.1,    # epsilon_er'$E_{\rm iso} = 10^{53} \rm erg$'
+            'epsilon_E':   0.1,    # epsilon_Er'$E_{\rm iso} = 10^{53} \rm erg$'
             'epsilon_B':   0.1,   # epsilon_B
             'xi_N':        1.0,    # Fraction of electrons accelerated
             'd_L':         1.0e28, # Luminosity distance in cm
