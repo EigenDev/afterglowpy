@@ -13,7 +13,6 @@ params = {
     "epsilon_e": 0.1,
     "epsilon_b": 0.1,
     "xi_N": 1.0,
-    "theta_wing": 0.1,
     "thetaWing": 0.1,
     "z": 0.55,
     "uMax": 1e3,
