@@ -337,11 +337,8 @@ def jet_flux_density_wrapper(
     n:         int,
     fp:        dict):
     cdef fluxParams flux_params
-    cdef INTEGRAL_TYPE intergraL_type
-    cdef GAMMA_TYPE gamma_type
-
-    intergraL_type = get_intergal_type(fp['int_type'])
-    gamma_type     = get_gamma_type(fp['gamma_type'])
+    cdef INTEGRAL_TYPE intergraL_type = get_intergal_type(fp['int_type'])
+    cdef GAMMA_TYPE gamma_type = get_gamma_type(fp['gamma_type'])
     setup_fluxParams(
         flux_params,
         fp['d_L'],
@@ -403,11 +400,9 @@ def intensity_wrapper(
     fp:        dict): 
 
     cdef fluxParams flux_params
-    cdef INTEGRAL_TYPE intergraL_type
-    cdef GAMMA_TYPE gamma_type
+    cdef INTEGRAL_TYPE intergraL_type = get_intergal_type(fp['int_type'])
+    cdef GAMMA_TYPE gamma_type =  get_gamma_type(fp['gamma_type'])
 
-    intergraL_type = get_intergal_type(fp['int_type'])
-    gamma_type     = get_gamma_type(fp['gamma_type'])
     setup_fluxParams(
         flux_params,
         fp['d_L'],
