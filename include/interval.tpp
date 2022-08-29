@@ -28,7 +28,6 @@ namespace afterglowpy
         double MeshBase<T>::totalIntergral()
         {
             double I = 0.0;
-            size_t i = 0;
             for(size_t i = 0; i < N; i++)
                 I += heap[i].I;
             return I;
