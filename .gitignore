@@ -16,4 +16,6 @@ src/afterglow_ext.cpp
 *.h5
 *.pdf
 *.txt
+*.csv
+observations/
 scratch/
