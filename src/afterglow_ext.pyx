@@ -228,25 +228,6 @@ def dP(
     )
 
     return 2*math.pi * em
-
-cdef void shock(
-    vector[double] &ate,
-    vector[double] &ar, 
-    vector[double] &au, 
-    NT:       int, 
-    r0:       double, 
-    u0:       double, 
-    shockArgs: double[9],
-):
-    shockEvolveRK4(
-        ate,
-        ar, 
-        au, 
-        NT, 
-        r0, 
-        u0, 
-        shockArgs
-    )
     
 def spherical_flux_density_wrapper(t, nu, **kwargs):
     t           = np.asanyarray(t)
