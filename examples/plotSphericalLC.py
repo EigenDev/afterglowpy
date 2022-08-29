@@ -22,14 +22,18 @@ params = {
     "k": 0,
     "Einj": 0,
 }
-
+plt.rc('text', usetex=True)
+nu0 = 1e9
 t    = np.geomspace(1.0e3, 1.0e7, 300)
-nu   = np.ones_like(t) * 1e9
+nu   = np.ones_like(t) * nu0
 tday = t * grb.sec2day
-t1 = (time.time())
+print("Computing....")
 a    = grb.fluxDensity(t, nu, **params)
-print(f"done in: {time.time() - t1:.2e} s")
-zzz = input('')
 
-plt.loglog(tday, a)
+print("Plotting...")
+oom = int(np.floor(np.log10(nu0)))
+fig, ax = plt.subplots(1, 1)
+ax.loglog(tday, a)
+ax.set_xlabel(r'$t [\rm{day}$')
+ax.set_ylabel(r'$F_\nu[10^{%d} \rm Hz]$'%(oom))
 plt.show()
