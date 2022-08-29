@@ -842,7 +842,7 @@ namespace afterglowpy
         {
             char msg[MSG_LEN];
             snprintf(msg, MSG_LEN, "Unknown integrator %d!  Aborting.\n",
-                     pars.int_type);
+                     static_cast<int>(pars.int_type));
             set_error(pars, msg);
             return 0.0;
         }
@@ -1056,7 +1056,7 @@ namespace afterglowpy
         {
             char msg[MSG_LEN];
             snprintf(msg, MSG_LEN, "Unknown integrator %d!  Aborting.\n",
-                     pars.int_type);
+                     static_cast<int>(pars.int_type));
             set_error(pars, msg);
             return 0.0;
         }
@@ -1126,16 +1126,15 @@ namespace afterglowpy
                    fluxParams &pars)
     {
         // Flux from a structured jet.
-        int i, j;
         // No Core
-        for (j = 0; j < Nt; j++)
+        for (int j = 0; j < Nt; j++)
             F[j] = 0.0;
 
         double Dtheta, theta_cone_hi, theta_cone_low, theta_h, theta_c, E_iso;
 
         Dtheta = theta_h_wing / res_cones;
 
-        for (i = 0; i < res_cones; i++)
+        for (int i = 0; i < res_cones; i++)
         {
             theta_c = (i + 0.5) * Dtheta;
             E_iso = f_E(theta_c, &pars);
@@ -1158,7 +1157,7 @@ namespace afterglowpy
             set_jet_params(pars, E_iso, theta_h);
             err_chk_void(pars);
 
-            for (j = 0; j < Nt; j++)
+            for (int j = 0; j < Nt; j++)
             {
                 // printf("tobs = %.6le\n", t[j]);
                 F[j] += flux_cone(t[j], nu[j], -1, -1, theta_cone_low, theta_cone_hi,
@@ -1191,8 +1190,7 @@ namespace afterglowpy
 
         Dtheta = (theta_h_wing - theta_h_core) / res_cones;
 
-        int i, j;
-        for (i = 0; i < res_cones; i++) {
+        for (int i = 0; i < res_cones; i++) {
             theta_c = theta_h_core + (i + 0.5) * Dtheta;
             E_iso = f_E(theta_c, &pars);
 
@@ -1211,7 +1209,7 @@ namespace afterglowpy
             set_jet_params(pars, E_iso, theta_h);
             err_chk_void(pars);
 
-            for (j = 0; j < Nt; j++) {
+            for (int j = 0; j < Nt; j++) {
             F[j] += flux_cone(t[j], nu[j], -1, -1, theta_cone_low, theta_cone_hi,
                                 F[j] * pars.rtol_struct / res_cones, pars);
             err_chk_void(pars);
@@ -1234,10 +1232,8 @@ namespace afterglowpy
         fluxParams &pars)
     {
         // Flux from a structured jet.
-
-        int i, j;
         // No Core
-        for (j = 0; j < Nt; j++)
+        for (int j = 0; j < Nt; j++)
             F[j] = 0.0;
 
         double Dtheta, theta_cone_hi, theta_cone_low, theta_h, theta_c, E_iso;
@@ -1267,7 +1263,7 @@ namespace afterglowpy
             set_jet_params(pars, E_iso, theta_h);
             err_chk_void(pars);
 
-            for (j = 0; j < Nt; j++)
+            for (int j = 0; j < Nt; j++)
             {
                 // printf("tobs = %.6le\n", t[j]);
                 F[j] += flux_cone(t[j], nu[j], -1, -1, theta_cone_low, theta_cone_hi,
@@ -2279,7 +2275,7 @@ namespace afterglowpy
                               "    E_iso = %.6lg   theta_h = %.6lg\n", E_iso, theta_h);
                 c += snprintf(msg + c, MSG_LEN - c,
                               "    gamma_type = %d   gamma_core = %.6lg\n",
-                              pars.gamma_type, pars.g_core);
+                              static_cast<int>(pars.gamma_type), pars.g_core);
                 set_error(pars, msg);
                 return;
             }
@@ -2422,7 +2418,7 @@ namespace afterglowpy
         c += snprintf(dump + c, DUMP_MSG_LEN_MAX - c, "    counterjet: %d\n",
                       pars.counterjet);
         c += snprintf(dump + c, DUMP_MSG_LEN_MAX - c, "    int_type: %d\n",
-                      pars.int_type);
+                      static_cast<int>(pars.int_type));
         c += snprintf(dump + c, DUMP_MSG_LEN_MAX - c, "    rtol_struct: %.12lg\n",
                       pars.rtol_struct);
         c += snprintf(dump + c, DUMP_MSG_LEN_MAX - c, "    rtol_theta: %.12lg\n",
@@ -2452,7 +2448,7 @@ namespace afterglowpy
         c += snprintf(dump + c, DUMP_MSG_LEN_MAX - c, "    spec_type: %d\n",
                       pars.spec_type);
         c += snprintf(dump + c, DUMP_MSG_LEN_MAX - c, "    gamma_type: %d\n",
-                      pars.gamma_type);
+                      static_cast<int>(pars.gamma_type));
         c += snprintf(dump + c, DUMP_MSG_LEN_MAX - c, "    nmask: %d\n", pars.nmask);
         c += snprintf(dump + c, DUMP_MSG_LEN_MAX - c, "    nevals: %ld\n",
                       pars.nevals);
