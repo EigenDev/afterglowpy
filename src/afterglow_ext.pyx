@@ -343,7 +343,7 @@ def jet_flux_density_wrapper(
         flux_params,
         fp['d_L'],
         fp['thetaObs'],
-        fp['E_iso_core'], 
+        fp['E0'], 
         fp['thetaCore'], 
         fp['thetaWing'],
         fp['b'], 
