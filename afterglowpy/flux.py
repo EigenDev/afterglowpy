@@ -522,7 +522,7 @@ def checkJetArgs(**argsDict):
     epsB = argsDict['epsilon_B']
     xiN = argsDict['xi_N']
     dL = argsDict['d_L']
-
+    
     # More-or-less universal bounds
     if theta_obs < 0.0 or theta_obs > 0.5*np.pi:
         raise ValueError("theta_obs must be in [0.0, pi/2]")

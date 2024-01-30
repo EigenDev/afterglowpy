@@ -190,17 +190,17 @@ cdef INTEGRAL_TYPE get_intergal_type(val: str):
         return INT_UNDEFINED
 
 def dP(
-    costheta: double, 
-    amu:      np.ndarray, 
-    ate:      np.ndarray, 
-    au:       np.ndarray, 
-    ar:       np.ndarray, 
-    nu:       double, 
-    n0:       double, 
-    p:        double, 
-    epsE:     double, 
-    epsB:     double, 
-    ksiN:     double, 
+    double costheta, 
+    np.ndarray[np.float64_t, ndim=1] amu, 
+    np.ndarray[np.float64_t, ndim=1] ate, 
+    np.ndarray[np.float64_t, ndim=1] au, 
+    np.ndarray[np.float64_t, ndim=1] ar, 
+    double nu, 
+    double n0, 
+    double p, 
+    double epsE, 
+    double epsB, 
+    double ksiN, 
     specType: int) -> double:
 
     mu = costheta
@@ -310,13 +310,13 @@ def spherical_flux_density_wrapper(t, nu, **kwargs):
     return Fnu
 
 def jet_flux_density_wrapper(
-    jet_type:  int, 
-    spec_type: int,
-    t:         vector[double],
-    nu:        vector[double],
-    fnu:       vector[double],
-    n:         int,
-    fp:        dict):
+    int jet_type, 
+    int spec_type,
+    vector[double] t,
+    vector[double] nu,
+    vector[double] fnu,
+    int n,
+    dict fp):
     cdef fluxParams flux_params
     cdef INTEGRAL_TYPE intergraL_type = get_intergal_type(fp['int_type'])
     cdef GAMMA_TYPE gamma_type = get_gamma_type(fp['gamma_type'])
@@ -370,15 +370,15 @@ def jet_flux_density_wrapper(
     return fnu
 
 def intensity_wrapper(
-    jet_type:  int, 
-    spec_type: int,
-    t:         vector[double],
-    nu:        vector[double],
-    theta:     vector[double],
-    phi:       vector[double],
-    Inu:       vector[double],
-    n:         int,
-    fp:        dict): 
+    int jet_type, 
+    int spec_type,
+    vector[double] t,
+    vector[double] nu,
+    vector[double] theta,
+    vector[double] phi,
+    vector[double] Inu,
+    int n,
+    dict fp): 
 
     cdef fluxParams flux_params
     cdef INTEGRAL_TYPE intergraL_type = get_intergal_type(fp['int_type'])

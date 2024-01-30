@@ -3,43 +3,44 @@
 
 // offaxis.h
 
-#include <stdlib.h>
-#include <iostream>
-#include <cmath>
 #include "integrate.hpp"
+#include <cmath>
+#include <iostream>
+#include <stdlib.h>
 
-#define MSG_LEN 4096
-#define DUMP_MSG_LEN_MAX 16384 // overkill: 200 lines * 80c per line = 16000
+#define MSG_LEN          4096
+#define DUMP_MSG_LEN_MAX 16384   // overkill: 200 lines * 80c per line = 16000
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 
 // some physical and mathematical constants
-constexpr double pi = 3.14159265358979323846;
-constexpr double v_light = 2.99792458e10;      // speed of light in cm / s
-constexpr double invv_light = 3.335640952e-11; // inverse speed of light s / cm
-constexpr double m_e = 9.1093897e-28;          // electron mass in g
-constexpr double m_p = 1.6726231e-24;          // proton mass in g
-constexpr double invm_e = 1.097768383e27;      // inverse electron mass in 1/g
-constexpr double invm_p = 5.978633202e23;      // inverse proton mass in 1/g
-constexpr double h_planck = 6.6260755e-27;     // Planck's constant in erg / s
-constexpr double h_bar = 1.05457266e-27;       // Planck's constant / 2 PI in erg /s
-constexpr double k_B = 1.380658e-16;           // Boltzmann's constant in erg / K
-constexpr double e_e = 4.803e-10;              // electron charge in Gaussian cgs units
-constexpr double sigma_T = 6.65e-25;           // Thomson cross section free electron cm^2
-constexpr double cgs2mJy = 1e26;               // quantity in cgs to mJy
-constexpr double mJy2cgs = 1e-26;              // quantity in mJy to cgs
-constexpr double deg2rad = 0.017453292;        // quantity in degrees to radians
-constexpr double rad2deg = 57.29577951;        // quantity in radians to degrees
-constexpr double sec2day = 0.000011574;        // quantity in seconds to days
-constexpr double day2sec = 86400;              // quantity in days to seconds
-constexpr double parsec = 3.0857e18;           // quantity in parsec to cm
-constexpr double Hz2eV = 4.13566553853599E-15;
-constexpr double eV2Hz = 2.417991e+14;
+constexpr double pi      = 3.14159265358979323846;
+constexpr double v_light = 2.99792458e10;   // speed of light in cm / s
+constexpr double invv_light =
+    3.335640952e-11;                          // inverse speed of light s / cm
+constexpr double m_e      = 9.1093897e-28;    // electron mass in g
+constexpr double m_p      = 1.6726231e-24;    // proton mass in g
+constexpr double invm_e   = 1.097768383e27;   // inverse electron mass in 1/g
+constexpr double invm_p   = 5.978633202e23;   // inverse proton mass in 1/g
+constexpr double h_planck = 6.6260755e-27;    // Planck's constant in erg / s
+constexpr double h_bar = 1.05457266e-27;   // Planck's constant / 2 PI in erg /s
+constexpr double k_B   = 1.380658e-16;     // Boltzmann's constant in erg / K
+constexpr double e_e   = 4.803e-10;   // electron charge in Gaussian cgs units
+constexpr double sigma_T =
+    6.65e-25;                       // Thomson cross section free electron cm^2
+constexpr double cgs2mJy = 1e26;    // quantity in cgs to mJy
+constexpr double mJy2cgs = 1e-26;   // quantity in mJy to cgs
+constexpr double deg2rad = 0.017453292;   // quantity in degrees to radians
+constexpr double rad2deg = 57.29577951;   // quantity in radians to degrees
+constexpr double sec2day = 0.000011574;   // quantity in seconds to days
+constexpr double day2sec = 86400;         // quantity in days to seconds
+constexpr double parsec  = 3.0857e18;     // quantity in parsec to cm
+constexpr double Hz2eV   = 4.13566553853599E-15;
+constexpr double eV2Hz   = 2.417991e+14;
 
-enum class EVOL_TYPE
-{
+enum class EVOL_TYPE {
     CONE,
     TOPHAT,
     GAUSSIAN,
@@ -52,25 +53,25 @@ enum class EVOL_TYPE
     RING,
 };
 
-#define _cone -2
-#define _tophat -1
-#define _Gaussian 0
-#define _powerlaw_core 1 // has a core as well
-#define _Gaussian_core 2 // has a core as well
-#define _spherical 3
-#define _powerlaw 4
-#define _exponential 5
-#define _twocomponent 6
-#define _exponential2 7
-#define _ring 8
+constexpr int _cone          = -2;
+constexpr int _tophat        = -1;
+constexpr int _Gaussian      = +0;
+constexpr int _powerlaw_core = +1;   // has a core as well
+constexpr int _Gaussian_core = +2;   // has a core as well
+constexpr int _spherical     = +3;
+constexpr int _powerlaw      = +4;
+constexpr int _exponential   = +5;
+constexpr int _twocomponent  = +6;
+constexpr int _exponential2  = +7;
+constexpr int _ring          = +8;
+constexpr int _Gaussian_ring = +9;
 
-#define IC_COOLING_FLAG 1
-#define EPS_E_BAR_FLAG 2
-#define SSA_SMOOTH_FLAG 4
-#define SSA_SHARP_FLAG 8
+constexpr int IC_COOLING_FLAG = 1;
+constexpr int EPS_E_BAR_FLAG  = 2;
+constexpr int SSA_SMOOTH_FLAG = 4;
+constexpr int SSA_SHARP_FLAG  = 8;
 
-enum class INTEGRAL_TYPE
-{
+enum class INTEGRAL_TYPE {
     INT_TRAP_FIXED,
     INT_TRAP_ADAPT,
     INT_SIMP_FIXED,
@@ -85,16 +86,14 @@ enum class INTEGRAL_TYPE
     INT_UNDEFINED
 };
 
-enum class GAMMA_TYPE
-{
+enum class GAMMA_TYPE {
     GAMMA_INF,
     GAMMA_FLAT,
     GAMMA_EVENMASS,
     GAMMA_STRUCT
 };
 
-struct fluxParams
-{
+struct fluxParams {
     double theta;
     double phi;
     double cp;
@@ -179,7 +178,7 @@ struct fluxParams
     int spec_type;
     GAMMA_TYPE gamma_type;
 
-    std::function<double(double, void *)> f_e;
+    std::function<double(double, void*)> f_e;
 
     std::vector<double> mask;
     int nmask;
@@ -187,35 +186,31 @@ struct fluxParams
     long nevals;
 
     int error;
-    char *error_msg;
+    char* error_msg;
 };
 
-constexpr void err_chk_void(fluxParams &pars)
+constexpr void err_chk_void(fluxParams& pars)
 {
-    if (pars.error)
-    {
+    if (pars.error) {
         return;
     }
 }
 
-constexpr int err_chk_int(fluxParams &pars)
+constexpr int err_chk_int(fluxParams& pars)
 {
-    if (pars.error)
-    {
+    if (pars.error) {
         return 0;
     }
 }
 
-constexpr double err_chk_dbl(fluxParams &pars)
+constexpr double err_chk_dbl(fluxParams& pars)
 {
-    if (pars.error)
-    {
+    if (pars.error) {
         return 0.0;
     }
 }
 
-namespace afterglowpy
-{
+namespace afterglowpy {
     /**
      * @brief Distribution function for tophat blast wave
      *
@@ -223,7 +218,7 @@ namespace afterglowpy
      * @param params struct of simulation parameters
      * @return double
      */
-    double f_E_tophat(double theta, void *params);
+    double f_E_tophat(double theta, void* params);
 
     /**
      * @brief Distribution function for tophat blast wave
@@ -232,7 +227,7 @@ namespace afterglowpy
      * @param params struct of simulation parameters
      * @return double
      */
-    double f_E_Gaussian(double theta, void *params);
+    double f_E_Gaussian(double theta, void* params);
 
     /**
      * @brief Distribution function for gaussian blast wave
@@ -241,7 +236,7 @@ namespace afterglowpy
      * @param params struct of simulation parameters
      * @return double
      */
-    double f_E_powerlaw(double theta, void *params);
+    double f_E_powerlaw(double theta, void* params);
 
     /**
      * @brief Distribution function for two-component blast wave
@@ -250,7 +245,7 @@ namespace afterglowpy
      * @param params struct of simulation parameters
      * @return double
      */
-    double f_E_twocomponent(double theta, void *params);
+    double f_E_twocomponent(double theta, void* params);
 
     /**
      * @brief Distribution function for exponential blast wave
@@ -259,7 +254,7 @@ namespace afterglowpy
      * @param params struct of simulation parameters
      * @return double
      */
-    double f_E_exponential(double theta, void *params);
+    double f_E_exponential(double theta, void* params);
 
     /**
      * @brief Energy distribution function for tophat blast wave
@@ -268,7 +263,7 @@ namespace afterglowpy
      * @param params struct of simulation parameters
      * @return double
      */
-    double f_Etot_tophat(void *params);
+    double f_Etot_tophat(void* params);
 
     /**
      * @brief Energy distribution function for Gaussian blast wave
@@ -277,9 +272,7 @@ namespace afterglowpy
      * @param params struct of simulation parameters
      * @return double
      */
-    double f_Etot_Gaussian(void *params);
-
-    
+    double f_Etot_Gaussian(void* params);
 
     /**
      * @brief Energy distribution function for power law blast wave
@@ -288,21 +281,21 @@ namespace afterglowpy
      * @param params struct of simulation parameters
      * @return double
      */
-    double f_Etot_powerlaw(void *params);
+    double f_Etot_powerlaw(void* params);
 
     /**
      * @brief Make table for radial zones
      *
      * @param pars
      */
-    void make_R_table(fluxParams &pars);
+    void make_R_table(fluxParams& pars);
 
     /**
      * @brief make table for cos(theta) zones
      *
      * @param pars
      */
-    void make_mu_table(fluxParams &pars);
+    void make_mu_table(fluxParams& pars);
 
     /**
      * @brief Check that the time in the emitter frame is valid
@@ -314,7 +307,13 @@ namespace afterglowpy
      * @param N
      * @return double
      */
-    double check_t_e(double t_e, double mu, double t_obs, std::vector<double> &mu_table, int N);
+    double check_t_e(
+        double t_e,
+        double mu,
+        double t_obs,
+        std::vector<double>& mu_table,
+        int N
+    );
 
     /**
      * @brief
@@ -324,7 +323,7 @@ namespace afterglowpy
      * @param N
      * @return int
      */
-    int searchSorted(double x, std::vector<double> &arr, int N);
+    int searchSorted(double x, std::vector<double>& arr, int N);
 
     /**
      * @brief Perform linear interpolation
@@ -337,7 +336,14 @@ namespace afterglowpy
      * @param N
      * @return double
      */
-    double interpolateLin(int a, int b, double x, std::vector<double> &X, std::vector<double> &Y, int N);
+    double interpolateLin(
+        int a,
+        int b,
+        double x,
+        std::vector<double>& X,
+        std::vector<double>& Y,
+        int N
+    );
 
     /**
      * @brief Perform logarithmic interpolation
@@ -350,7 +356,14 @@ namespace afterglowpy
      * @param N
      * @return double
      */
-    double interpolateLog(int a, int b, double x, std::vector<double> &X, std::vector<double> &Y, int N);
+    double interpolateLog(
+        int a,
+        int b,
+        double x,
+        std::vector<double>& X,
+        std::vector<double>& Y,
+        int N
+    );
 
     /**
      * @brief Compute the jet edge extremum
@@ -364,8 +377,15 @@ namespace afterglowpy
      * @param N
      * @return double
      */
-    double find_jet_edge(double phi, double cto, double sto, double theta0,
-                        std::vector<double> &a_mu, std::vector<double> &a_thj, int N);
+    double find_jet_edge(
+        double phi,
+        double cto,
+        double sto,
+        double theta0,
+        std::vector<double>& a_mu,
+        std::vector<double>& a_thj,
+        int N
+    );
 
     /**
      * @brief Cosine theta integrand in spherical coordinate jacobican
@@ -374,7 +394,7 @@ namespace afterglowpy
      * @param params
      * @return double
      */
-    double costheta_integrand(double a_theta, void *params); // inner integral
+    double costheta_integrand(double a_theta, void* params);   // inner integral
 
     /**
      * @brief Phi integrand in spherical coordinate jacobian
@@ -383,7 +403,7 @@ namespace afterglowpy
      * @param params
      * @return double
      */
-    double phi_integrand(double a_phi, void *params); // outer integral
+    double phi_integrand(double a_phi, void* params);   // outer integral
 
     /**
      * @brief compute zone emissivity
@@ -403,18 +423,19 @@ namespace afterglowpy
      * @return double
      */
     double emissivity(
-        double nu, 
-        double R, 
-        double mu, 
+        double nu,
+        double R,
+        double mu,
         double te,
-        double u, 
-        double us, 
-        double n0, 
-        double p, 
+        double u,
+        double us,
+        double n0,
+        double p,
         double epse,
-        double epsB, 
-        double ksiN, 
-        int specType);
+        double epsB,
+        double ksiN,
+        int specType
+    );
 
     /**
      * @brief Compute zone flux given t_obs
@@ -423,7 +444,7 @@ namespace afterglowpy
      * @param atol
      * @return double
      */
-    double flux(fluxParams &pars, double atol);
+    double flux(fluxParams& pars, double atol);
 
     /**
      * @brief Compute observed flux for conical structure
@@ -438,9 +459,16 @@ namespace afterglowpy
      * @param pars
      * @return double
      */
-    double flux_cone(double t_obs, double nu_obs, double E_iso, double theta_h,
-                    double theta_cone_low, double theta_cone_hi,
-                    double atol, fluxParams &pars);
+    double flux_cone(
+        double t_obs,
+        double nu_obs,
+        double E_iso,
+        double theta_h,
+        double theta_cone_low,
+        double theta_cone_hi,
+        double atol,
+        fluxParams& pars
+    );
 
     /**
      * @brief Compute intensity in a zone
@@ -456,14 +484,15 @@ namespace afterglowpy
      * @return double
      */
     double intensity(
-        double theta, 
-        double phi, 
-        double tobs, 
+        double theta,
+        double phi,
+        double tobs,
         double nuobs,
-        double theta_obs, 
-        double theta_cone_hi, 
+        double theta_obs,
+        double theta_cone_hi,
         double theta_cone_low,
-        fluxParams &pars);
+        fluxParams& pars
+    );
 
     /**
      * @brief Compute primitive variables in the shock
@@ -481,17 +510,18 @@ namespace afterglowpy
      * @param pars
      */
     void shockVals(
-        double theta, 
-        double phi, 
+        double theta,
+        double phi,
         double tobs,
-        std::vector<double> &t, 
-        std::vector<double> &R, 
-        std::vector<double> &u, 
-        std::vector<double> &thj,
-        double theta_obs, 
-        double theta_cone_hi, 
+        std::vector<double>& t,
+        std::vector<double>& R,
+        std::vector<double>& u,
+        std::vector<double>& thj,
+        double theta_obs,
+        double theta_cone_hi,
         double theta_cone_low,
-        fluxParams &pars);
+        fluxParams& pars
+    );
 
     /**
      * @brief Compute intensity in a conical blast wave
@@ -508,16 +538,17 @@ namespace afterglowpy
      * @param pars
      */
     void intensity_cone(
-        std::vector<double> &theta, 
-        std::vector<double> &phi, 
-        std::vector<double> &t, 
-        std::vector<double> &nu,
-        std::vector<double> &I, 
-        int N, 
+        std::vector<double>& theta,
+        std::vector<double>& phi,
+        std::vector<double>& t,
+        std::vector<double>& nu,
+        std::vector<double>& I,
+        int N,
         double E_iso_core,
-        double theta_h_core, 
+        double theta_h_core,
         double theta_h_wing,
-        fluxParams &pars);
+        fluxParams& pars
+    );
 
     /**
      * @brief Compute  complete intensity profile
@@ -536,18 +567,19 @@ namespace afterglowpy
      * @param pars
      */
     void intensity_struct(
-        std::vector<double> &theta, 
-        std::vector<double> &phi, 
-        std::vector<double> &t, 
-        std::vector<double> &nu,
-        std::vector<double> &I, 
+        std::vector<double>& theta,
+        std::vector<double>& phi,
+        std::vector<double>& t,
+        std::vector<double>& nu,
+        std::vector<double>& I,
         int N,
         double E_iso_core,
-        double theta_h_core, 
+        double theta_h_core,
         double theta_h_wing,
-        int res_cones, 
-        std::function<double(double, void *)> func,
-        fluxParams &pars);
+        int res_cones,
+        std::function<double(double, void*)> func,
+        fluxParams& pars
+    );
 
     /**
      * @brief Compute intensity structure in a core
@@ -566,18 +598,19 @@ namespace afterglowpy
      * @param pars
      */
     void intensity_structCore(
-        std::vector<double> &theta, 
-        std::vector<double> &phi, 
-        std::vector<double> &t, 
-        std::vector<double> &nu,
-        std::vector<double> &I, 
+        std::vector<double>& theta,
+        std::vector<double>& phi,
+        std::vector<double>& t,
+        std::vector<double>& nu,
+        std::vector<double>& I,
         int N,
         double E_iso_core,
-        double theta_h_core, 
+        double theta_h_core,
         double theta_h_wing,
-        int res_cones, 
-        std::function<double(double, void *)> func,
-        fluxParams &pars);
+        int res_cones,
+        std::function<double(double, void*)> func,
+        fluxParams& pars
+    );
 
     /**
      * @brief Compute primitive shock variables in a core structure
@@ -596,18 +629,19 @@ namespace afterglowpy
      * @param pars
      */
     void shockVals_cone(
-        std::vector<double> &theta, 
-        std::vector<double> &phi, 
-        std::vector<double> &tobs,
-        std::vector<double> &t, 
-        std::vector<double> &R, 
-        std::vector<double> &u, 
-        std::vector<double> &thj, 
+        std::vector<double>& theta,
+        std::vector<double>& phi,
+        std::vector<double>& tobs,
+        std::vector<double>& t,
+        std::vector<double>& R,
+        std::vector<double>& u,
+        std::vector<double>& thj,
         int N,
         double E_iso_core,
-        double theta_h_core, 
+        double theta_h_core,
         double theta_h_wing,
-        fluxParams &pars);
+        fluxParams& pars
+    );
 
     /**
      * @brief Compute shock primitive values in non-core structure
@@ -628,20 +662,21 @@ namespace afterglowpy
      * @param pars
      */
     void shockVals_struct(
-        std::vector<double> &theta, 
-        std::vector<double> &phi, 
-        std::vector<double> &tobs,
-        std::vector<double> &t, 
-        std::vector<double> &R, 
-        std::vector<double> &u, 
-        std::vector<double> &thj, 
+        std::vector<double>& theta,
+        std::vector<double>& phi,
+        std::vector<double>& tobs,
+        std::vector<double>& t,
+        std::vector<double>& R,
+        std::vector<double>& u,
+        std::vector<double>& thj,
         int N,
         double E_iso_core,
-        double theta_h_core, 
+        double theta_h_core,
         double theta_h_wing,
-        int res_cones, 
-        std::function<double(double, void *)> func,
-        fluxParams &pars);
+        int res_cones,
+        std::function<double(double, void*)> func,
+        fluxParams& pars
+    );
 
     /**
      * @brief Compute shock primitives in core strucrure
@@ -662,20 +697,21 @@ namespace afterglowpy
      * @param pars
      */
     void shockVals_structCore(
-        std::vector<double> &theta, 
-        std::vector<double> &phi, 
-        std::vector<double> &tobs,
-        std::vector<double> &t, 
-        std::vector<double> &R, 
-        std::vector<double> &u, 
-        std::vector<double> &thj, 
+        std::vector<double>& theta,
+        std::vector<double>& phi,
+        std::vector<double>& tobs,
+        std::vector<double>& t,
+        std::vector<double>& R,
+        std::vector<double>& u,
+        std::vector<double>& thj,
         int N,
         double E_iso_core,
-        double theta_h_core, 
+        double theta_h_core,
         double theta_h_wing,
-        int res_cones, 
-        std::function<double(double, void *)> func,
-        fluxParams &pars);
+        int res_cones,
+        std::function<double(double, void*)> func,
+        fluxParams& pars
+    );
 
     /**
      * @brief Compute light curve for a tophat blast wave
@@ -689,13 +725,14 @@ namespace afterglowpy
      * @param pars
      */
     void lc_tophat(
-        std::vector<double> &t, 
-        std::vector<double> &nu, 
-        std::vector<double> &F, 
+        std::vector<double>& t,
+        std::vector<double>& nu,
+        std::vector<double>& F,
         int Nt,
         double E_iso,
-        double theta_h, 
-        fluxParams &pars);
+        double theta_h,
+        fluxParams& pars
+    );
 
     /**
      * @brief Compute light curve for conical blast wave
@@ -710,14 +747,15 @@ namespace afterglowpy
      * @param pars
      */
     void lc_cone(
-        std::vector<double> &t, 
-        std::vector<double> &nu, 
-        std::vector<double> &F, 
-        int Nt, 
+        std::vector<double>& t,
+        std::vector<double>& nu,
+        std::vector<double>& F,
+        int Nt,
         double E_iso,
-        double theta_core, 
-        double theta_wing, 
-        fluxParams &pars);
+        double theta_core,
+        double theta_wing,
+        fluxParams& pars
+    );
 
     /**
      * @brief Compute light curve for power law blast wave in core
@@ -736,17 +774,19 @@ namespace afterglowpy
      * @param pars
      */
     void lc_powerlawCore(
-        std::vector<double> &t, 
-        std::vector<double> &nu, 
-        std::vector<double> &F, 
+        std::vector<double>& t,
+        std::vector<double>& nu,
+        std::vector<double>& F,
         int Nt,
-        double E_iso_core, 
+        double E_iso_core,
         double theta_h_core,
-        double theta_h_wing, 
+        double theta_h_wing,
         double beta,
-        std::vector<double> &theta_c_arr, 
-        std::vector<double> &E_iso_arr,
-        int res_cones, fluxParams &pars);
+        std::vector<double>& theta_c_arr,
+        std::vector<double>& E_iso_arr,
+        int res_cones,
+        fluxParams& pars
+    );
 
     /**
      * @brief Compute light curve for power law blast wave
@@ -764,16 +804,18 @@ namespace afterglowpy
      * @param pars
      */
     void lc_powerlaw(
-        std::vector<double> &t, 
-        std::vector<double> &nu, 
-        std::vector<double> &F, 
+        std::vector<double>& t,
+        std::vector<double>& nu,
+        std::vector<double>& F,
         int Nt,
-        double E_iso_core, 
+        double E_iso_core,
         double theta_h_core,
         double theta_h_wing,
-        std::vector<double> &theta_c_arr, 
-        std::vector<double> &E_iso_arr,
-        int res_cones, fluxParams &pars);
+        std::vector<double>& theta_c_arr,
+        std::vector<double>& E_iso_arr,
+        int res_cones,
+        fluxParams& pars
+    );
 
     /**
      * @brief Compyte light curve in Gaussian structure
@@ -791,16 +833,18 @@ namespace afterglowpy
      * @param pars
      */
     void lc_Gaussian(
-        std::vector<double> &t, 
-        std::vector<double> &nu, 
-        std::vector<double> &F, 
+        std::vector<double>& t,
+        std::vector<double>& nu,
+        std::vector<double>& F,
         int Nt,
         double E_iso_core,
-        double theta_h_core, 
+        double theta_h_core,
         double theta_h_wing,
-        std::vector<double> &theta_c_arr, 
-        std::vector<double> &E_iso_arr,
-        int res_cones, fluxParams &pars);
+        std::vector<double>& theta_c_arr,
+        std::vector<double>& E_iso_arr,
+        int res_cones,
+        fluxParams& pars
+    );
 
     /**
      * @brief Compute light curve in Gaussian core structure
@@ -817,11 +861,19 @@ namespace afterglowpy
      * @param res_cones
      * @param pars
      */
-    void lc_GaussianCore(std::vector<double> &t, std::vector<double> &nu, std::vector<double> &F, int Nt,
-                        double E_iso_core,
-                        double theta_h_core, double theta_h_wing,
-                        std::vector<double> &theta_c_arr, std::vector<double> &E_iso_arr,
-                        int res_cones, fluxParams pars);
+    void lc_GaussianCore(
+        std::vector<double>& t,
+        std::vector<double>& nu,
+        std::vector<double>& F,
+        int Nt,
+        double E_iso_core,
+        double theta_h_core,
+        double theta_h_wing,
+        std::vector<double>& theta_c_arr,
+        std::vector<double>& E_iso_arr,
+        int res_cones,
+        fluxParams pars
+    );
 
     /**
      * @brief Calculate the total flux density
@@ -835,13 +887,14 @@ namespace afterglowpy
      * @param fp
      */
     void calc_flux_density(
-        int jet_type, 
-        int spec_type, 
-        std::vector<double> &t,
-        std::vector<double> &nu, 
-        std::vector<double> &Fnu, 
+        int jet_type,
+        int spec_type,
+        std::vector<double>& t,
+        std::vector<double>& nu,
+        std::vector<double>& Fnu,
         int N,
-        fluxParams &fp);
+        fluxParams& fp
+    );
 
     /**
      * @brief Calculate the totqal intensity in a zone
@@ -857,15 +910,16 @@ namespace afterglowpy
      * @param fp
      */
     void calc_intensity(
-        int jet_type, 
-        int spec_type, 
-        std::vector<double> &theta, 
-        std::vector<double> &phi,
-        std::vector<double> &t, 
-        std::vector<double> &nu, 
-        std::vector<double> &Inu, 
+        int jet_type,
+        int spec_type,
+        std::vector<double>& theta,
+        std::vector<double>& phi,
+        std::vector<double>& t,
+        std::vector<double>& nu,
+        std::vector<double>& Inu,
         int N,
-        fluxParams &fp);
+        fluxParams& fp
+    );
 
     /**
      * @brief Calculate the shock primitive values
@@ -881,9 +935,18 @@ namespace afterglowpy
      * @param N
      * @param fp
      */
-    void calc_shockVals(int jet_type, std::vector<double> &theta, std::vector<double> &phi, std::vector<double> &tobs,
-                        std::vector<double> &t, std::vector<double> &R, std::vector<double> &u, std::vector<double> &thj, int N,
-                        fluxParams &p);
+    void calc_shockVals(
+        int jet_type,
+        std::vector<double>& theta,
+        std::vector<double>& phi,
+        std::vector<double>& tobs,
+        std::vector<double>& t,
+        std::vector<double>& R,
+        std::vector<double>& u,
+        std::vector<double>& thj,
+        int N,
+        fluxParams& p
+    );
 
     /**
      * @brief Setup the flux parameters for computation
@@ -924,15 +987,15 @@ namespace afterglowpy
      * @param gamma_type
      */
     void setup_fluxParams(
-        fluxParams &pars,
+        fluxParams& pars,
         double d_L,
         double theta_obs,
-        double E_iso_core, 
-        double theta_core, 
+        double E_iso_core,
+        double theta_core,
         double theta_wing,
-        double b, 
-        double L0, 
-        double q, 
+        double b,
+        double L0,
+        double q,
         double ts,
         double n_0,
         double p,
@@ -942,21 +1005,23 @@ namespace afterglowpy
         double g0,
         double E_core_global,
         double theta_core_global,
-        double ta, 
+        double ta,
         double tb,
-        int tRes, 
-        int latRes, 
+        int tRes,
+        int latRes,
         INTEGRAL_TYPE int_type,
         double rtol_struct,
-        double rtol_phi, 
+        double rtol_phi,
         double rtol_theta,
-        int nmax_phi, 
+        int nmax_phi,
         int nmax_theta,
         int spec_type,
-        std::vector<double> &mask, 
+        std::vector<double>& mask,
         int nmask,
-        int spread, int counterjet, 
-        GAMMA_TYPE gamma_type);
+        int spread,
+        int counterjet,
+        GAMMA_TYPE gamma_type
+    );
 
     /**
      * @brief Set the jet params objects
@@ -965,7 +1030,7 @@ namespace afterglowpy
      * @param E_iso
      * @param theta_h
      */
-    void set_jet_params(fluxParams &pars, double E_iso, double theta_h);
+    void set_jet_params(fluxParams& pars, double E_iso, double theta_h);
 
     /**
      * @brief Set the obs params object
@@ -977,16 +1042,21 @@ namespace afterglowpy
      * @param current_theta_cone_hi
      * @param current_theta_cone_low
      */
-    void set_obs_params(fluxParams &pars, double t_obs, double nu_obs,
-                        double theta_obs_cur, double current_theta_cone_hi,
-                        double current_theta_cone_low);
+    void set_obs_params(
+        fluxParams& pars,
+        double t_obs,
+        double nu_obs,
+        double theta_obs_cur,
+        double current_theta_cone_hi,
+        double current_theta_cone_low
+    );
     /**
      * @brief Check for any errors
      *
      * @param params
      * @return int
      */
-    int check_error(void *params);
+    int check_error(void* params);
 
     /**
      * @brief Set the error object
@@ -994,10 +1064,10 @@ namespace afterglowpy
      * @param pars
      * @param msg
      */
-    void set_error(fluxParams &pars, char msg[]);
+    void set_error(fluxParams& pars, char msg[]);
 
-    void free_fluxParams(fluxParams &pars);
-    
-} // namespace afterglowpy
+    void free_fluxParams(fluxParams& pars);
+
+}   // namespace afterglowpy
 
 #endif

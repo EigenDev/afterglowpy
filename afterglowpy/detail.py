@@ -33,6 +33,7 @@ class Jet(IntEnum):
     Twocomponent   = 6,
     Exponential2   = 7,
     Ring           = 8,
+    GaussianRing   = 9,
     
 default_params = {
     "E_iso_core":  1.0e53,
