@@ -167,8 +167,10 @@ def fluxDensity(t, nu, *args, **kwargs):
     nuz = nu * (1+z)
     # Default spreading method
     if 'spread' in argsDict:
-        if argsDict['spread'] == True:
-            if jetType == -2 and 'thetaCoreGlobal' in argsDict:
+        if argsDict['spread']:
+            if jetType in [8, 9]:
+                argsDict['spread'] = 9
+            elif jetType == -2 and 'thetaCoreGlobal' in argsDict:
                 argsDict['spread'] = 8
             else:
                 argsDict['spread'] = 7
@@ -389,8 +391,10 @@ def intensity(theta, phi, t, nu, *args, **kwargs):
 
     # Default spreading method
     if 'spread' in argsDict:
-        if argsDict['spread'] is True:
-            if jetType == -2 and 'thetaCoreGlobal' in argsDict:
+        if argsDict['spread']:
+            if jetType in [8, 9]:
+                argsDict['spread'] = 9
+            elif jetType == -2 and 'thetaCoreGlobal' in argsDict:
                 argsDict['spread'] = 8
             else:
                 argsDict['spread'] = 7
