@@ -1,8 +1,9 @@
 #ifndef INTERVAL_HPP
 #define INTERVAL_HPP
 
-#include <vector>
 #include <fstream>
+#include <vector>
+
 /*
  * Here are 3 helper structs for performing global adaptive integration.
  * Each Mesh struct is a priority queue implemented with as a simple
@@ -19,50 +20,41 @@
  * respectively.
  */
 
-namespace afterglowpy
-{
-    namespace mesh
-    {
-        
+namespace afterglowpy {
+    namespace mesh {
+
         template <typename T>
-        struct MeshBase 
-        {
-            MeshBase(int size = 4, int N = 0) : totalSize(size), N(N), heap(std::vector<T>(50)) {
-                
-            };
+        struct MeshBase {
+            MeshBase(int size = 4, int N = 0)
+                : totalSize(size), N(N), heap(std::vector<T>(size)){};
 
             // ~MeshBase<T>();
-            void insert(T &interval);
-            void extract(T &worst);
+            void insert(T& interval);
+            void extract(T& worst);
             double totalIntergral();
             double totalError();
             void write(char** buf);
-            int meshCheck(); 
+            int meshCheck();
             void heapifyUp();
             void heapifyDown();
-            void meshWrite(char **buf);
+            void meshWrite(char** buf);
             size_t totalSize;
             size_t N;
             std::vector<T> heap;
         };
 
-        struct Interval
-        {
+        struct Interval {
             double a;
             double b;
             double I;
             double err;
         };
 
-
-        struct Mesh : MeshBase<Interval>
-        {
+        struct Mesh : MeshBase<Interval> {
             using MeshBase<Interval>::MeshBase;
         };
 
-
-        struct Interval3
-        {
+        struct Interval3 {
             double a;
             double b;
             double I;
@@ -72,15 +64,11 @@ namespace afterglowpy
             double fm;
         };
 
-
-        struct Mesh3 : MeshBase<Interval3>
-        {
+        struct Mesh3 : MeshBase<Interval3> {
             using MeshBase<Interval3>::MeshBase;
         };
 
-
-        struct Interval5
-        {
+        struct Interval5 {
             double a;
             double b;
             double I;
@@ -92,15 +80,11 @@ namespace afterglowpy
             double fr;
         };
 
-
-        struct Mesh5 : MeshBase<Interval5>
-        {
+        struct Mesh5 : MeshBase<Interval5> {
             using MeshBase<Interval5>::MeshBase;
         };
 
-
-        struct Interval9
-        {
+        struct Interval9 {
             double a;
             double b;
             double I;
@@ -117,14 +101,13 @@ namespace afterglowpy
             int refinement;
         };
 
-        struct Mesh9 : MeshBase<Interval9>
-        {
+        struct Mesh9 : MeshBase<Interval9> {
             using MeshBase<Interval9>::MeshBase;
-            void intervalWrite(Interval9 &i, FILE *stream);
+            void intervalWrite(Interval9& i, FILE* stream);
         };
-    } // namespace mesh
-    
-} // namespace afterglowpy
+    }   // namespace mesh
+
+}   // namespace afterglowpy
 
 #include "interval.tpp"
 #endif

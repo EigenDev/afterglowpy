@@ -1,6 +1,6 @@
-#include "include/offaxis_struct.hpp"
-#include "include/shockEvolution.hpp"
-#include <string.h>
+#include "../../include/offaxis_struct.hpp"
+#include "../../include/shockEvolution.hpp"
+#include <string>
 
 /////////////////////////////////////////////////////////////////////////
 namespace afterglowpy {
@@ -27,9 +27,18 @@ namespace afterglowpy {
     {
         fluxParams& pars = *(fluxParams*) params;
         if (theta <= pars.theta_wing) {
-            double x      = theta / pars.theta_core;
-            double offset = 0.5 * M_PI / pars.theta_core;
-            return pars.E_iso_core * exp(-0.5 * (x - offset) * (x - offset));
+            double x = (theta - 0.5 * M_PI) / (0.5 * M_PI - pars.theta_core);
+            return pars.E_iso_core * exp(-0.5 * x * x);
+        }
+        return 0.0;
+    }
+
+    double f_E_PoyntingRing(double theta, void* params)
+    {
+        fluxParams& pars = *(fluxParams*) params;
+        if (theta <= pars.theta_wing) {
+            double x = std::sin(theta);
+            return pars.E_iso_core * x * x;
         }
         return 0.0;
     }
@@ -51,6 +60,16 @@ namespace afterglowpy {
         if (theta <= pars.theta_wing) {
             double x = theta / pars.theta_core;
             return pars.E_iso_core * exp(-0.5 * (x * x - 1));
+        }
+        return 0.0;
+    }
+
+    double f_E_GaussianCoreRing(double theta, void* params)
+    {
+        fluxParams& pars = *(fluxParams*) params;
+        if (theta <= pars.theta_wing) {
+            double x = (0.5 * M_PI - theta) / (0.5 * M_PI - pars.theta_core);
+            return pars.E_iso_core * exp(-0.5 * (x * x - 1.0));
         }
         return 0.0;
     }
@@ -319,8 +338,16 @@ namespace afterglowpy {
         }
 
         double th0 = pars.theta_h;
-        double fom = 2 * sin(0.5 * th0) *
-                     sin(0.5 * th0);   // Fraction of solid angle in jet.
+        // std::cout << "make R table th0: " << th0 << "\n";
+        double fom = [&]() {
+            if (pars.jetType != _ring) {
+                return 2.0 * std::sin(0.5 * th0) *
+                       std::sin(0.5 * th0);   // Fraction of solid angle in jet.
+            }
+            else {
+                return std::sin(0.5 * M_PI - th0);
+            }
+        }();
 
         double Mej_sph;
         if (pars.g_init > 1.0) {
@@ -879,7 +906,8 @@ namespace afterglowpy {
                 theta_1,
                 pars.mu_table,
                 pars.th_table,
-                pars.table_entries
+                pars.table_entries,
+                pars.jetType
             );
 
             if (pars.table_entries_inner == 0) {
@@ -894,7 +922,8 @@ namespace afterglowpy {
                     theta_0,
                     pars.mu_table_inner,
                     pars.th_table_inner,
-                    pars.table_entries_inner
+                    pars.table_entries_inner,
+                    pars.jetType
                 );
             }
             /*
@@ -1204,7 +1233,8 @@ namespace afterglowpy {
         double theta0,
         std::vector<double>& a_mu,
         std::vector<double>& a_thj,
-        int N
+        int N,
+        int jet_type
     )
     {
         /*
@@ -1231,27 +1261,67 @@ namespace afterglowpy {
         double mu = std::cos(theta0) * cto + std::sin(theta0) * sto * cp;
 
         int ia = searchSorted(mu, a_mu, N);
+        if (jet_type < 8) {
+            if (a_thj[ia] <= theta0 && theta0 <= a_thj[ia + 1]) {
+                return theta0;
+            }
+
+            double tha, thb;
+            if (theta0 < a_thj[ia]) {
+                // The jet is spreading
+                tha = theta0;
+                thb = 0.5 * M_PI;
+            }
+            else {
+                // Guessed too far out!
+                tha = 0.0;
+                thb = theta0;
+            }
+            int i = 0;
+            while (thb - tha > 1.0e-5 && i < 100) {
+                double th = 0.5 * (tha + thb);
+                mu        = cos(th) * cto + sin(th) * sto * cp;
+                ia        = searchSorted(mu, a_mu, N);
+                if (th < a_thj[ia]) {
+                    tha = th;
+                }
+                else {
+                    thb = th;
+                }
+                i++;
+            }
+
+            // printf("iter: %d, th0=%.6lf, th=%.6lf\n", i, theta0, tha);
+
+            return tha;
+        }
+
+        // std::cout << "theta0: " << theta0 << "\n";
+        // std::cout << "thetaj_ia: " << a_thj[ia] << "\n";
+        // std::cout << "thetaja_iap: " << a_thj[ia + 1] << "\n";
+        // std::cin.get();
+        // find the jet edge for ring-like jet
         if (a_thj[ia] <= theta0 && theta0 <= a_thj[ia + 1]) {
             return theta0;
         }
 
         double tha, thb;
-        if (theta0 < a_thj[ia]) {
-            // The jet is spreading
-            tha = theta0;
+        if (theta0 > a_thj[ia]) {
+            // The Lc is spreading
+            tha = a_thj[ia];
             thb = 0.5 * M_PI;
         }
         else {
             // Guessed too far out!
-            tha = 0.0;
-            thb = theta0;
+            tha = theta0;
+            thb = 0.5 * M_PI;
         }
         int i = 0;
         while (thb - tha > 1.0e-5 && i < 100) {
             double th = 0.5 * (tha + thb);
             mu        = cos(th) * cto + sin(th) * sto * cp;
             ia        = searchSorted(mu, a_mu, N);
-            if (th < a_thj[ia]) {
+            if (th > a_thj[ia]) {
                 tha = th;
             }
             else {
@@ -1259,8 +1329,6 @@ namespace afterglowpy {
             }
             i++;
         }
-
-        // printf("iter: %d, th0=%.6lf, th=%.6lf\n", i, theta0, tha);
 
         return tha;
     }
@@ -1560,7 +1628,10 @@ namespace afterglowpy {
         fluxParams& pars
     )
     {
-        set_jet_params(pars, E_iso, theta_wing);
+        // theta_wing is always PI/2 for toroidal outflows, so calculate the
+        // conical outflow based on theta_core instead
+        const auto relevant_theta = pars.jetType < 8 ? theta_wing : theta_core;
+        set_jet_params(pars, E_iso, relevant_theta);
         err_chk_void(pars);
         for (int i = 0; i < Nt; i++) {
             F[i] = flux_cone(
@@ -1642,6 +1713,9 @@ namespace afterglowpy {
                 continue;
             }
 
+            // std::cout << "theta_c jet: " << theta_c << "\n";
+            // std::cout << "theta_h jet: " << theta_h << "\n";
+            // std::cin.get();
             set_jet_params(pars, E_iso, theta_h);
             err_chk_void(pars);
 
@@ -1705,6 +1779,10 @@ namespace afterglowpy {
                 continue;
             }
 
+            // std::cout << E_iso << "\n";
+            // std::cout << "theta_c jet: " << theta_c << "\n";
+            // std::cout << "theta_h jet: " << theta_h << "\n";
+            // std::cin.get();
             set_jet_params(pars, E_iso, theta_h);
             err_chk_void(pars);
 
@@ -1739,7 +1817,7 @@ namespace afterglowpy {
         fluxParams& pars
     )
     {
-        // Flux from a structured jet.
+        // Flux from a structured ring.
         // No Core
         for (int j = 0; j < Nt; j++) {
             F[j] = 0.0;
@@ -1753,7 +1831,7 @@ namespace afterglowpy {
 
             theta_cone_hi  = (i + 1) * Dtheta;
             theta_cone_low = i * Dtheta;
-            theta_h        = theta_cone_hi;
+            theta_h        = theta_cone_low;
 
             // printf("cone %d: th_lo=%.6lf th_hi=%.6lf, E=%.6le\n", i,
             //        theta_cone_low, theta_cone_hi, E_iso);
@@ -1769,11 +1847,81 @@ namespace afterglowpy {
                 continue;
             }
 
+            // std::cout << E_iso << "\n";
+            // std::cout << "theta_c ring: " << theta_c << "\n";
+            // std::cout << "theta_h ring: " << theta_h << "\n";
+            // std::cout << "theta_l ring: " << theta_cone_low << "\n";
+            // std::cin.get();
+
             set_jet_params(pars, E_iso, theta_h);
             err_chk_void(pars);
 
             for (int j = 0; j < Nt; j++) {
                 // printf("tobs = %.6le\n", t[j]);
+                F[j] += flux_cone(
+                    t[j],
+                    nu[j],
+                    -1,
+                    -1,
+                    theta_cone_low,
+                    theta_cone_hi,
+                    F[j] * pars.rtol_struct / res_cones,
+                    pars
+                );
+                err_chk_void(pars);
+            }
+        }
+    }
+
+    void lc_structCoreRing(
+        std::vector<double>& t,
+        std::vector<double>& nu,
+        std::vector<double>& F,
+        int Nt,
+        double E_iso_core,
+        double theta_h_core,
+        double theta_h_wing,
+        double* theta_c_arr,
+        double* E_iso_arr,
+        int res_cones,
+        double (*f_E)(double, void*),
+        fluxParams& pars
+    )
+    {
+        // Flux from a structured jet with core.
+        lc_cone(t, nu, F, Nt, E_iso_core, theta_h_core, theta_h_wing, pars);
+        err_chk_void(pars);
+
+        double Dtheta, theta_cone_hi, theta_cone_low, theta_h, theta_c, E_iso;
+
+        Dtheta = (theta_h_wing - theta_h_core) / res_cones;
+        for (int i = res_cones; i-- > 0;) {
+            theta_c = theta_h_core + (i + 0.5) * Dtheta;
+            E_iso   = f_E(theta_c, &pars);
+
+            theta_cone_hi  = theta_h_core + (i + 1) * Dtheta;
+            theta_cone_low = theta_h_core + i * Dtheta;
+            theta_h        = theta_cone_low;
+
+            if (theta_c_arr) {
+                theta_c_arr[i] = theta_c;
+            }
+            if (E_iso_arr) {
+                E_iso_arr[i] = E_iso;
+            }
+
+            if (E_iso <= 0.0) {
+                continue;
+            }
+
+            // std::cout << E_iso << "\n";
+            // std::cout << "theta_c ring: " << theta_c << "\n";
+            // std::cout << "theta_h ring: " << theta_h << "\n";
+            // std::cin.get();
+            set_jet_params(pars, E_iso, theta_h);
+            err_chk_void(pars);
+
+            for (int j = 0; j < Nt; j++) {
                 F[j] += flux_cone(
                     t[j],
                     nu[j],
@@ -2308,7 +2456,8 @@ namespace afterglowpy {
                 theta_cone_hi,
                 pars.mu_table,
                 pars.th_table,
-                pars.table_entries
+                pars.table_entries,
+                pars.jetType
             );
             if (pars.table_entries_inner == 0) {
                 th_a = (theta_cone_low / theta_cone_hi) * th_b;
@@ -2321,7 +2470,8 @@ namespace afterglowpy {
                     theta_cone_low,
                     pars.mu_table_inner,
                     pars.th_table_inner,
-                    pars.table_entries_inner
+                    pars.table_entries_inner,
+                    pars.jetType
                 );
             }
 
@@ -2427,7 +2577,8 @@ namespace afterglowpy {
                     theta_cone_hi,
                     pars.mu_table,
                     pars.th_table,
-                    pars.table_entries
+                    pars.table_entries,
+                    pars.jetType
                 );
                 err_chk_void(pars);
                 if (pars.table_entries_inner == 0) {
@@ -2441,7 +2592,8 @@ namespace afterglowpy {
                         theta_cone_low,
                         pars.mu_table_inner,
                         pars.th_table_inner,
-                        pars.table_entries_inner
+                        pars.table_entries_inner,
+                        pars.jetType
                     );
                     err_chk_void(pars);
                 }
@@ -2557,7 +2709,8 @@ namespace afterglowpy {
                     theta_cone_hi,
                     pars.mu_table,
                     pars.th_table,
-                    pars.table_entries
+                    pars.table_entries,
+                    pars.jetType
                 );
                 err_chk_void(pars);
                 if (pars.table_entries_inner == 0) {
@@ -2571,7 +2724,8 @@ namespace afterglowpy {
                         theta_cone_low,
                         pars.mu_table_inner,
                         pars.th_table_inner,
-                        pars.table_entries_inner
+                        pars.table_entries_inner,
+                        pars.jetType
                     );
                     err_chk_void(pars);
                 }
@@ -2667,7 +2821,8 @@ namespace afterglowpy {
                 theta_cone_hi,
                 pars.mu_table,
                 pars.th_table,
-                pars.table_entries
+                pars.table_entries,
+                pars.jetType
             );
             err_chk_void(pars);
             if (pars.table_entries_inner == 0) {
@@ -2681,7 +2836,8 @@ namespace afterglowpy {
                     theta_cone_low,
                     pars.mu_table_inner,
                     pars.th_table_inner,
-                    pars.table_entries_inner
+                    pars.table_entries_inner,
+                    pars.jetType
                 );
                 err_chk_void(pars);
             }
@@ -2791,7 +2947,8 @@ namespace afterglowpy {
                     theta_cone_hi,
                     pars.mu_table,
                     pars.th_table,
-                    pars.table_entries
+                    pars.table_entries,
+                    pars.jetType
                 );
                 err_chk_void(pars);
                 if (pars.table_entries_inner == 0) {
@@ -2805,7 +2962,8 @@ namespace afterglowpy {
                         theta_cone_low,
                         pars.mu_table_inner,
                         pars.th_table_inner,
-                        pars.table_entries_inner
+                        pars.table_entries_inner,
+                        pars.jetType
                     );
                     err_chk_void(pars);
                 }
@@ -2925,7 +3083,8 @@ namespace afterglowpy {
                     theta_cone_hi,
                     pars.mu_table,
                     pars.th_table,
-                    pars.table_entries
+                    pars.table_entries,
+                    pars.jetType
                 );
                 err_chk_void(pars);
                 if (pars.table_entries_inner == 0) {
@@ -2939,7 +3098,8 @@ namespace afterglowpy {
                         theta_cone_low,
                         pars.mu_table_inner,
                         pars.th_table_inner,
-                        pars.table_entries_inner
+                        pars.table_entries_inner,
+                        pars.jetType
                     );
                     err_chk_void(pars);
                 }
@@ -2981,7 +3141,16 @@ namespace afterglowpy {
         double theta_h_core = fp.theta_core;
         double theta_h_wing = fp.theta_wing;
 
-        int res_cones = static_cast<int>(latRes * theta_h_wing / theta_h_core);
+        int res_cones = [latRes, theta_h_wing, theta_h_core, jet_type]() {
+            if (jet_type == _ring || jet_type == _Poynting_ring ||
+                jet_type == _Gaussian_ring) {
+                return static_cast<int>(
+                    latRes * theta_h_wing / (0.5 * M_PI - theta_h_core)
+                );
+            }
+            return static_cast<int>(latRes * theta_h_wing / theta_h_core);
+        }();
+
         if (jet_type == _tophat) {
             lc_tophat(t, nu, Fnu, N, E_iso_core, theta_h_core, fp);
         }
@@ -3117,6 +3286,22 @@ namespace afterglowpy {
             );
         }
         else if (jet_type == _Gaussian_ring) {
+            lc_structCoreRing(
+                t,
+                nu,
+                Fnu,
+                N,
+                E_iso_core,
+                theta_h_core,
+                theta_h_wing,
+                nullptr,
+                nullptr,
+                res_cones,
+                &f_E_GaussianCoreRing,
+                fp
+            );
+        }
+        else if (jet_type == _Poynting_ring) {
             lc_structRing(
                 t,
                 nu,
@@ -3128,7 +3313,7 @@ namespace afterglowpy {
                 nullptr,
                 nullptr,
                 res_cones,
-                &f_E_GaussianRing,
+                &f_E_PoyntingRing,
                 fp
             );
         }
@@ -3410,7 +3595,8 @@ namespace afterglowpy {
         int nmask,
         int spread,
         int counterjet,
-        GAMMA_TYPE gamma_type
+        GAMMA_TYPE gamma_type,
+        int jetType
     )
     {
         pars.t_table             = std::vector<double>();
@@ -3467,6 +3653,7 @@ namespace afterglowpy {
         pars.nmask      = nmask;
         pars.spread     = spread;
         pars.counterjet = counterjet;
+        pars.jetType    = jetType;
 
         pars.nevals = 0;
 
@@ -3492,7 +3679,12 @@ namespace afterglowpy {
             E_jet = pars.E_tot;
         }
         else {
-            E_jet = (1.0 - std::cos(theta_h)) * E_iso;
+            if (pars.jetType < 8) {
+                E_jet = (1.0 - std::cos(theta_h)) * E_iso;
+            }
+            else {
+                E_jet = std::sin(0.5 * M_PI - theta_h) * E_iso;
+            }
         }
 
         double Einj = 0.0;

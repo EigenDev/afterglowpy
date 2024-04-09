@@ -1,6 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "include/interval.hpp"
+#include <cstdio>
+#include <cstdlib>
+
 /*
  * Here are 3 helper structs for performing global adaptive integration.
  * Each Mesh Is a priority queue implemented with as a simple
@@ -17,19 +18,34 @@
  * respectively.
  */
 
-
-namespace afterglowpy
-{
-    namespace mesh
-    {
-        void Mesh9::intervalWrite(Interval9 &i, FILE *stream)
+namespace afterglowpy {
+    namespace mesh {
+        void Mesh9::intervalWrite(Interval9& i, FILE* stream)
         {
-            fprintf(stream, "(%.3le, %.3le)  %.12le +/- %.3le   %d\n",
-                    i.a, i.b, i.I, i.err, i.refinement);
-            fprintf(stream, "   [%.3le %.3le %.3le %.3le %.3le %.3le"
-                            " %.3le %.3le %.3le]\n", i.fa, i.fll, i.fl, i.flr,
-                            i.fm, i.frl, i.fr, i.frr, i.fb);
+            fprintf(
+                stream,
+                "(%.3le, %.3le)  %.12le +/- %.3le   %d\n",
+                i.a,
+                i.b,
+                i.I,
+                i.err,
+                i.refinement
+            );
+            fprintf(
+                stream,
+                "   [%.3le %.3le %.3le %.3le %.3le %.3le"
+                " %.3le %.3le %.3le]\n",
+                i.fa,
+                i.fll,
+                i.fl,
+                i.flr,
+                i.fm,
+                i.frl,
+                i.fr,
+                i.frr,
+                i.fb
+            );
         }
-    } // namespace mesh
-    
-} // namespace afterglowpy
+    }   // namespace mesh
+
+}   // namespace afterglowpy

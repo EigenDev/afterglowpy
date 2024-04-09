@@ -89,7 +89,8 @@ cdef extern from "../include/offaxis_struct.hpp" namespace "afterglowpy":
         int nmask,
         int spread, 
         int counterjet, 
-        GAMMA_TYPE gamma_type
+        GAMMA_TYPE gamma_type,
+        int jetType
     )
 
     void calc_flux_density(
@@ -354,7 +355,8 @@ def jet_flux_density_wrapper(
         fp['nmask'],
         fp['spread'], 
         fp['counterjet'], 
-        gamma_type
+        gamma_type,
+        jet_type
     )
 
     calc_flux_density(
@@ -418,7 +420,8 @@ def intensity_wrapper(
         fp['nmask'],
         fp['spread'], 
         fp['counterjet'], 
-        gamma_type
+        gamma_type,
+        jet_type
     )
 
     calc_intensity(

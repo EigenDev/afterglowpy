@@ -5,8 +5,8 @@
 
 #include "integrate.hpp"
 #include <cmath>
+#include <cstdlib>
 #include <iostream>
-#include <stdlib.h>
 
 #define MSG_LEN          4096
 #define DUMP_MSG_LEN_MAX 16384   // overkill: 200 lines * 80c per line = 16000
@@ -51,6 +51,7 @@ enum class EVOL_TYPE {
     TWOCOMPONENT,
     EXPONENTIAL2,
     RING,
+    RINGCORE,
 };
 
 constexpr int _cone          = -2;
@@ -63,8 +64,9 @@ constexpr int _powerlaw      = +4;
 constexpr int _exponential   = +5;
 constexpr int _twocomponent  = +6;
 constexpr int _exponential2  = +7;
-constexpr int _ring          = +8;
-constexpr int _Gaussian_ring = +9;
+constexpr int _ring          = +8;    // Gaussian ring
+constexpr int _Gaussian_ring = +9;    // Gaussian ring with core
+constexpr int _Poynting_ring = +10;   // Poynting Ring
 
 constexpr int IC_COOLING_FLAG = 1;
 constexpr int EPS_E_BAR_FLAG  = 2;
@@ -127,6 +129,7 @@ struct fluxParams {
     double theta_core_global;
 
     int envType;
+    int jetType;
     double As;
     double Rwind;
 
@@ -221,13 +224,40 @@ namespace afterglowpy {
     double f_E_tophat(double theta, void* params);
 
     /**
-     * @brief Distribution function for tophat blast wave
+     * @brief Distribution function for Gaussian het-like blast wave
      *
      * @param theta  angle
      * @param params struct of simulation parameters
      * @return double
      */
     double f_E_Gaussian(double theta, void* params);
+
+    /**
+     * @brief Distribution function for Gaussian ring-like blast wave
+     *
+     * @param theta  angle
+     * @param params struct of simulation parameters
+     * @return double
+     */
+    double f_E_GaussianRing(double theta, void* params);
+
+    /**
+     * @brief Distribution function for Gaussian ring-like blast wave w/ core
+     *
+     * @param theta  angle
+     * @param params struct of simulation parameters
+     * @return double
+     */
+    double f_E_GaussianRingCore(double theta, void* params);
+
+    /**
+     * @brief Distribution function for Poynting ring-like blast wave
+     *
+     * @param theta  angle
+     * @param params struct of simulation parameters
+     * @return double
+     */
+    double f_E_PoyntingRing(double theta, void* params);
 
     /**
      * @brief Distribution function for gaussian blast wave
@@ -384,7 +414,8 @@ namespace afterglowpy {
         double theta0,
         std::vector<double>& a_mu,
         std::vector<double>& a_thj,
-        int N
+        int N,
+        int jet_type
     );
 
     /**
@@ -847,7 +878,7 @@ namespace afterglowpy {
     );
 
     /**
-     * @brief Compute light curve in Gaussian core structure
+     * @brief Compute light curve for Gaussian-like structured structure
      *
      * @param t
      * @param nu
@@ -862,6 +893,92 @@ namespace afterglowpy {
      * @param pars
      */
     void lc_GaussianCore(
+        std::vector<double>& t,
+        std::vector<double>& nu,
+        std::vector<double>& F,
+        int Nt,
+        double E_iso_core,
+        double theta_h_core,
+        double theta_h_wing,
+        std::vector<double>& theta_c_arr,
+        std::vector<double>& E_iso_arr,
+        int res_cones,
+        fluxParams pars
+    );
+
+    /**
+     * @brief Compute light curve for Gaussian-like ring structure w/o core
+     *
+     * @param t
+     * @param nu
+     * @param F
+     * @param Nt
+     * @param E_iso_core
+     * @param theta_h_core
+     * @param theta_h_wing
+     * @param theta_c_arr
+     * @param E_iso_arr
+     * @param res_cones
+     * @param pars
+     */
+    void lc_GaussianRing(
+        std::vector<double>& t,
+        std::vector<double>& nu,
+        std::vector<double>& F,
+        int Nt,
+        double E_iso_core,
+        double theta_h_core,
+        double theta_h_wing,
+        std::vector<double>& theta_c_arr,
+        std::vector<double>& E_iso_arr,
+        int res_cones,
+        fluxParams pars
+    );
+    /**
+     * @brief Compute light curve for Gaussian-like ring structure w/ core
+     *
+     * @param t
+     * @param nu
+     * @param F
+     * @param Nt
+     * @param E_iso_core
+     * @param theta_h_core
+     * @param theta_h_wing
+     * @param theta_c_arr
+     * @param E_iso_arr
+     * @param res_cones
+     * @param pars
+     */
+    void lc_GaussianCoreRing(
+        std::vector<double>& t,
+        std::vector<double>& nu,
+        std::vector<double>& F,
+        int Nt,
+        double E_iso_core,
+        double theta_h_core,
+        double theta_h_wing,
+        std::vector<double>& theta_c_arr,
+        std::vector<double>& E_iso_arr,
+        int res_cones,
+        fluxParams pars
+    );
+
+    /**
+     * @brief Compute light curve for Pynting-like ring structure
+     *
+     * @param t
+     * @param nu
+     * @param F
+     * @param Nt
+     * @param E_iso_core
+     * @param theta_h_core
+     * @param theta_h_wing
+     * @param theta_c_arr
+     * @param E_iso_arr
+     * @param res_cones
+     * @param pars
+     */
+    void lc_PoyntingRing(
         std::vector<double>& t,
         std::vector<double>& nu,
         std::vector<double>& F,
@@ -1020,7 +1137,8 @@ namespace afterglowpy {
         int nmask,
         int spread,
         int counterjet,
-        GAMMA_TYPE gamma_type
+        GAMMA_TYPE gamma_type,
+        int jetType
     );
 
     /**
