@@ -1,5 +1,6 @@
 # disutils: language = c++
 from libcpp.vector cimport vector 
+from libcpp cimport bool
 cimport numpy as np 
 import numpy as np 
 import scipy.integrate as integrate
@@ -141,7 +142,8 @@ cdef extern from "../include/shockEvolution.hpp" namespace "afterglowpy":
         double u0, 
         double th0, 
         void *args,
-        int   spread
+        int   spread,
+        bool jet_like,
     )
 
     void shockEvolveRK4(
