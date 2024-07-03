@@ -387,8 +387,9 @@ namespace afterglowpy {
         shockInitFind(Rt0, &R0, &u0, pars.tRes / 10, args);
         // printf("t0=%.6le R0=%.6le u0=%.6le\n", Rt0, R0, u0);
 
-        args[0] = pars.E_iso * fom;
-        args[1] = Mej_sph * fom;
+        args[0]             = pars.E_iso * fom;
+        args[1]             = Mej_sph * fom;
+        const auto jet_like = pars.jetType < 8;
         shockEvolveSpreadRK4(
             t_table,
             R_table,
@@ -399,7 +400,8 @@ namespace afterglowpy {
             u0,
             th0,
             args,
-            spread
+            spread,
+            jet_like
         );
         if (R_table[0] != R_table[0]) {
             char msg[MSG_LEN];
