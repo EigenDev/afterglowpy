@@ -368,7 +368,14 @@ namespace afterglowpy {
         xdot[1] = dudt;
     }
 
-    void RuThdot3D(double t, double* x, void* argv, double* xdot, int spread)
+    void RuThdot3D(
+        double t,
+        double* x,
+        void* argv,
+        double* xdot,
+        int spread,
+        const bool jet_like
+    )
     {
         double* args = (double*) argv;
 
@@ -392,8 +399,7 @@ namespace afterglowpy {
         double be  = u / g;
         double bes = 4 * u * g / (4 * u * u + 3);
 
-        const bool jet_like = thC < 0.25 * M_PI;
-        double delta_theta  = [&] {
+        double delta_theta = [&] {
             if (jet_like) {
                 return th;
             }
@@ -697,7 +703,8 @@ namespace afterglowpy {
         double u0,
         double th0,
         void* args,
-        int spread
+        int spread,
+        const bool jet_like
     )
     {
         int i, j;
@@ -713,22 +720,22 @@ namespace afterglowpy {
             x0[0] = R[i];
             x0[1] = u[i];
             x0[2] = th[i];
-            RuThdot3D(t[i], x0, args, k1, spread);
+            RuThdot3D(t[i], x0, args, k1, spread, jet_like);
 
             for (j = 0; j < 3; j++) {
                 x[j] = x0[j] + 0.5 * dt * k1[j];
             }
-            RuThdot3D(t[i], x, args, k2, spread);
+            RuThdot3D(t[i], x, args, k2, spread, jet_like);
 
             for (j = 0; j < 3; j++) {
                 x[j] = x0[j] + 0.5 * dt * k2[j];
             }
-            RuThdot3D(t[i], x, args, k3, spread);
+            RuThdot3D(t[i], x, args, k3, spread, jet_like);
 
             for (j = 0; j < 3; j++) {
                 x[j] = x0[j] + dt * k3[j];
             }
-            RuThdot3D(t[i], x, args, k4, spread);
+            RuThdot3D(t[i], x, args, k4, spread, jet_like);
 
             for (j = 0; j < 3; j++) {
                 x[j] =
